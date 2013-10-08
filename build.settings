@@ -1,0 +1,61 @@
+settings =
+{
+    iphone =
+    {
+        plist=
+	   {
+            UIApplicationExitsOnSuspend = false,
+            UIPrerenderedIcon = true,
+            UIStatusBarHidden = false,
+            CFBundleIconFile = "Icon.png",
+            CFBundleIconFiles = {
+                "Icon.png", 
+                "Icon@2x.png", 
+                "Icon-60.png",
+                "Icon-60@2x.png",
+                "Icon-72.png", 
+                "Icon-72@2x.png",
+                "Icon-76.png",
+                "Icon-76@2x.png", 
+                "Icon-Small.png", 
+                "Icon-Small@2x.png",
+                "Icon-Small-40.png",
+                "Icon-Small-40@2x.png",
+                "Icon-Small-50.png", 
+                "Icon-Small-50@2x.png", 
+            },
+        },
+   },
+   orientation =
+   {
+      default = "portrait",
+      supported =
+      {
+         "portait", "portraitUpsideDown", 
+      },
+   },
+   android =
+   {
+        usesPermissions =
+        {
+            -- Required by the MapView to fetch its contents from the Google Maps servers.
+            "android.permission.INTERNET",
+
+            -- Optional permission used to display current location via the GPS.
+            "android.permission.ACCESS_FINE_LOCATION",
+
+            -- Optional permission used to display current location via WiFi or cellular service.
+            "android.permission.ACCESS_COARSE_LOCATION",
+        },
+        usesFeatures =
+        {
+            -- If you set permissions "ACCESS_FINE_LOCATION" and "ACCESS_COARSE_LOCATION" above,
+            -- then you may want to set up your app to not require location services as follows.
+            -- Otherwise, devices that do not have location sevices (such as a GPS) will be unable
+            -- to purchase this app in the app store.
+            { name = "android.hardware.location", required = false },
+            { name = "android.hardware.location.gps", required = false },
+            { name = "android.hardware.location.network", required = false },
+        },
+   }
+}
