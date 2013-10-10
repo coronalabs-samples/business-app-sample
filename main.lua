@@ -102,6 +102,10 @@ if system.getInfo("platformName") == "Android" then
 
 else
     myApp.theme = "widget_theme_ios7"
+    local coronaBuild = system.getInfo("build")
+    if tonumber(coronaBuild:sub(6,12)) < 1206 then
+        myApp.theme = "widget_theme_ios"
+    end
     myApp.font = "HelveticaNeue-Light"
     myApp.fontBold = "HelveticaNeue"
     myApp.fontItalic = "HelveticaNeue-LightItalic"

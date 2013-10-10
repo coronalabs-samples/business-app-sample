@@ -40,10 +40,7 @@ local scene = storyboard.newScene()
 local widget = require( "widget" )
 local myApp = require( "myapp" )
 
---if not myApp.legacy then
---    widget.setTheme(myApp.theme)
---end
-widget.setTheme("widget_theme_ios7")
+widget.setTheme(myApp.theme)
 
 local titleText
 local locationtxt
