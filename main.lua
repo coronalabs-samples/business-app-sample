@@ -52,6 +52,16 @@ if display.contentWidth > 320 then
 end
 
 --
+-- Handle Graphics 2.0 changes
+myApp.colorDivisor = 255
+myApp.isGraphics2 = true
+if tonumber( system.getInfo("build") ) < 2013.2000 then
+    -- we are a Graphics 1.0 build
+    myApp.colorDivisor = 1
+    myApp.isGraphics2 = false
+end
+
+--
 -- turn on debugging
 --
 local debugMode = true
@@ -203,7 +213,10 @@ local tabButtons = {
         label = "Menu",
         defaultFile = "images/tabbaricon.png",
         overFile = "images/tabbaricon-down.png",
-        labelColor = { default = { 64, 64, 64 }, over = { 196, 132, 64 }},
+        labelColor = { 
+            default = { 64/myApp.colorDivisor, 64/myApp.colorDivisor, 64/myApp.colorDivisor }, 
+            over = { 196/myApp.colorDivisor, 132/myApp.colorDivisor, 64/myApp.colorDivisor }
+        },
         width = 32,
         height = 32,
         onPress = myApp.showScreen1,
@@ -213,7 +226,10 @@ local tabButtons = {
         label = "Blogs",
         defaultFile = "images/tabbaricon.png",
         overFile = "images/tabbaricon-down.png",
-        labelColor = { default = { 64, 64, 64 }, over = { 196, 132, 64 }},
+        labelColor = { 
+            default = { 64/myApp.colorDivisor, 64/myApp.colorDivisor, 64/myApp.colorDivisor }, 
+            over = { 196/myApp.colorDivisor, 132/myApp.colorDivisor, 64/myApp.colorDivisor }
+        },
         width = 32,
         height = 32,
         onPress = myApp.showScreen2,
@@ -222,7 +238,10 @@ local tabButtons = {
         label = "Pics",
         defaultFile = "images/tabbaricon.png",
         overFile = "images/tabbaricon-down.png",
-        labelColor = { default = { 64, 64, 64 }, over = { 196, 132, 64 }},
+        labelColor = { 
+            default = { 64/myApp.colorDivisor, 64/myApp.colorDivisor, 64/myApp.colorDivisor }, 
+            over = { 196/myApp.colorDivisor, 132/myApp.colorDivisor, 64/myApp.colorDivisor }
+        },
         width = 32,
         height = 32,
         onPress = myApp.showScreen3,
@@ -231,7 +250,10 @@ local tabButtons = {
         label = "Video",
         defaultFile = "images/tabbaricon.png",
         overFile = "images/tabbaricon-down.png",
-        labelColor = { default = { 64, 64, 64 }, over = { 196, 132, 64 }},
+        labelColor = { 
+            default = { 64/myApp.colorDivisor, 64/myApp.colorDivisor, 64/myApp.colorDivisor }, 
+            over = { 196/myApp.colorDivisor, 132/myApp.colorDivisor, 64/myApp.colorDivisor }
+        },
         width = 32,
         height = 32,
         onPress = myApp.showScreen4,
@@ -240,7 +262,10 @@ local tabButtons = {
         label = "Map",
         defaultFile = "images/tabbaricon.png",
         overFile = "images/tabbaricon-down.png",
-        labelColor = { default = { 64, 64, 64 }, over = { 196, 132, 64 }},
+        labelColor = { 
+            default = { 64/myApp.colorDivisor, 64/myApp.colorDivisor, 64/myApp.colorDivisor }, 
+            over = { 196/myApp.colorDivisor, 132/myApp.colorDivisor, 64/myApp.colorDivisor }
+        },
         width = 32,
         height = 32,
         onPress = myApp.showScreen5,
@@ -264,14 +289,20 @@ myApp.tabBar = widget.newTabBar{
 
 
 local background = display.newRect(0,0, display.contentWidth, display.contentHeight)
-background:setFillColor(255,255,255)
+background:setFillColor(255/myApp.colorDivisor,255/myApp.colorDivisor,255/myApp.colorDivisor)
+background.x = display.contentCenterX
+background.y = display.contentCenterY
 
-local logo = display.newImageRect("Default.png", 320, 480)
+local logo = display.newImageRect("Splash.png", 320, 480)
 logo.x = display.contentCenterX
 logo.y = display.contentCenterY
 
 local title = display.newText("Business Sample App", 0, 0, myApp.fontBold, 28)
-title:setTextColor(0, 0, 0)
+if myApp.isGraphics2 then
+    title:setFillColor( 0 )
+else
+    title:setTextColor(0)
+end
 title.x = display.contentCenterX
 title.y = display.contentHeight - 64
 --

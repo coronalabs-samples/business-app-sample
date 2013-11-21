@@ -64,7 +64,7 @@ function scene:createScene( event )
 
     print("create scene")
     local background = display.newRect(0,0,display.contentWidth, display.contentHeight)
-    background:setFillColor(242, 242, 242, 255)
+    background:setFillColor(242/myApp.colorDivisor, 242/myApp.colorDivisor, 242/myApp.colorDivisor, 255/myApp.colorDivisor)
     background.x = display.contentWidth / 2
     background.y = display.contentHeight / 2
 
@@ -95,8 +95,7 @@ function scene:createScene( event )
 
     -- create embossed text to go above toolbar
     titleText = display.newText( title, 0, 0, myApp.fontBold, 20 )
-    titleText:setTextColor( 255, 255, 255 )
-    titleText:setReferencePoint( display.CenterReferencePoint )
+    titleText:setTextColor( 255/myApp.colorDivisor, 255/myApp.colorDivisor, 255/myApp.colorDivisor )
     titleText.x = display.contentCenterX
     titleText.y = titleBar.height * 0.5 + display.topStatusBarContentHeight
     group:insert(titleText)
@@ -206,7 +205,7 @@ function scene:enterScene( event )
    
     local isTall = 0
     if myApp.isTall then
-        isTall = 44
+        isTall = 88
     end
 
     -- turn off the activity indicator and show the webview
@@ -216,6 +215,8 @@ function scene:enterScene( event )
 --    native.showWebPopup(0, 51 + 60 + 20 + 60, display.contentWidth, 220 + isTall, "story.html", options )
     
     webView = native.newWebView(0, 71, display.contentWidth, 300 + isTall)
+    webView.x = display.contentCenterX
+    webView.y = 150 + isTall / 2 + 71
     webView:request("story.html", system.TemporaryDirectory)
     webView:addEventListener( "urlRequest", webListener )
     -- add a button to see the full article in the web browser

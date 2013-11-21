@@ -69,7 +69,7 @@ function scene:createScene( event )
 	g = self.view
 		
     local background = display.newRect(0,0,display.contentWidth, display.contentHeight)
-    background:setFillColor(242, 242, 242, 255)
+    background:setFillColor(242/myApp.colorDivisor, 242/myApp.colorDivisor, 242/myApp.colorDivisor, 255/myApp.colorDivisor)
     background.x = display.contentWidth / 2
     background.y = display.contentHeight / 2
 
@@ -88,8 +88,11 @@ function scene:createScene( event )
     g:insert(titleBar)
 
     titleText = display.newText( "Photo Gallery", 0, 0, myApp.fontBold, 20 )
-    titleText:setTextColor( 255, 255, 255 )
-    titleText:setReferencePoint( display.CenterReferencePoint )
+    if myApp.isGraphics2 then
+    	titleText:setFillColor(1, 1, 1)
+    else
+        titleText:setTextColor( 255, 255, 255 )
+    end
     titleText.x = display.contentCenterX
     titleText.y = titleBar.height * 0.5 + display.topStatusBarContentHeight
     g:insert(titleText)

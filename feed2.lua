@@ -120,7 +120,11 @@ local function onRowRender(event)
     -- setup the the row background,  I've chosen to alternate rows with
     -- a pale blue and pale green color
     row.bg = display.newRect(0, 0, display.contentWidth, 60)
-    row.bg:setFillColor(255,255,255)
+    if myApp.isGraphics2 then
+        row.bg.anchorX = 0
+        row.bg.anchorY = 0
+    end
+    row.bg:setFillColor(255/myApp.colorDivisor,255/myApp.colorDivisor,255/myApp.colorDivisor)
 
     row:insert(row.bg)
     
@@ -153,7 +157,12 @@ local function onRowRender(event)
             local h = event.target.height
             local s = itemIcon.height / h
             event.target:scale(s,s)
-            event.target:setReferencePoint(display.TopLeftReferencePoint)
+            if myApp.isGraphics2 then
+                event.target.anchorX = 0
+                event.target.anchorY = 0
+            else
+                event.target:setReferencePoint(display.TopLeftReferencePoint)
+            end
             event.target.x = 2
             event.target.y = 4
             --
@@ -205,7 +214,6 @@ local function onRowRender(event)
         -- it uses the table above to get all the information we need
         --
         row.icon = display.newImageRect(myApp.icons, 12 , 40, 40 )
-        row.icon:setReferencePoint(display.CenterReferencePoint)
         row.icon.x = 20
         row.icon.y = row.height / 2
         row:insert(row.icon)
@@ -221,32 +229,42 @@ local function onRowRender(event)
         title = "CU" .. string.sub(title,18)
     end
 
-    local myTitle = stories[id].title
+    local myTitle = title
     if string.len(myTitle) > 26 then
         myTitle = string.sub(stories[id].title, 1, 26) .. "..."
     end
     row.title = display.newText( myTitle, 12, 0, myApp.fontBold, 18 )
-    row.title:setReferencePoint( display.CenterLeftReferencePoint )
+    if myApp.isGraphics2 then
+        row.title.anchorX = 0
+        row.title:setFillColor( 0 )
+    else
+        row.title:setReferencePoint( display.CenterLeftReferencePoint )
+        row.title:setTextColor( 0 )
+    end
     row.title.y = 22
     row.title.x = 42
-    row.title:setTextColor( 0 )
+
     
     --
     -- show the publish time in grey below the headline
     --
     local timeStamp = string.match(stories[id].pubDate,"%w+, %d+ %w+ %w+ %w+:%w+")
     row.subtitle = display.newText( timeStamp, 12, 0, myApp.font, 14)
-    row.subtitle:setReferencePoint(display.CenterLeftReferencePoint )
+    if myApp.isGraphics2 then 
+        row.subtitle.anchorX = 0
+        row.subtitle:setFillColor(96/255, 96/255, 96/255, 1)
+    else
+        row.subtitle:setReferencePoint(display.CenterLeftReferencePoint )
+        row.subtitle:setTextColor(96, 96, 96, 255)
+    end
     row.subtitle.y = row.height - 18
     row.subtitle.x = 42
-    row.subtitle:setTextColor(96, 96, 96, 255)
-
+ 
     --
     -- Add a graphical right arrow to the right side to indicate the reader
     -- should touch the row for more information
     --
     row.rightArrow = display.newImageRect(myApp.icons, 15 , 40, 40)
-    row.rightArrow:setReferencePoint(display.CenterReferencePoint)
     row.rightArrow.x = display.contentWidth - 20
     row.rightArrow.y = row.height / 2
     -- must insert everything into event.view:
@@ -276,8 +294,8 @@ local function showTableView()
         myList:insertRow{
             rowHeight = 60,
             isCategory = false,
-            rowColor = {255, 255, 255, 255},
-            lineColor = { 232, 232, 232, 255  },
+            rowColor = {255/myApp.colorDivisor, 255/myApp.colorDivisor, 255/myApp.colorDivisor, 255/myApp.colorDivisor},
+            lineColor = { 232/myApp.colorDivisor, 232/myApp.colorDivisor, 232/myApp.colorDivisor, 255/myApp.colorDivisor  },
         }
     end
     -- cancel the busy indicator
@@ -407,7 +425,7 @@ function scene:createScene( event )
 
     print("create scene")
     local background = display.newRect(0,0,display.contentWidth, display.contentHeight)
-    background:setFillColor(242, 242, 242, 255)
+    background:setFillColor(242/myApp.colorDivisor/myApp.colorDivisor, 242/myApp.colorDivisor, 242/myApp.colorDivisor, 255/myApp.colorDivisor)
     background.x = display.contentWidth / 2
     background.y = display.contentHeight / 2
 
@@ -431,8 +449,11 @@ function scene:createScene( event )
 
     -- create embossed text to go above toolbar
     titleText = display.newText( params.pageTitle, 0, 0, myApp.fontBold, 20 )
-    titleText:setTextColor( 255, 255, 255 )
-    titleText:setReferencePoint( display.CenterReferencePoint )
+    if myApp.isGraphics2 then
+        titleText:setFillColor(1, 1, 1)
+    else
+        titleText:setTextColor( 255, 255, 255 )
+    end
     titleText.x = display.contentCenterX
     titleText.y = titleBar.height * 0.5 + display.topStatusBarContentHeight
     group:insert(titleText)

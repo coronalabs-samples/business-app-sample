@@ -55,7 +55,9 @@ function scene:createScene(event)
 	local group = self.view
 
 	local background = display.newRect(0,0,display.contentWidth, display.contentHeight)
-	background:setFillColor(242, 242, 242, 255)
+	background:setFillColor(242/myApp.colorDivisor, 242/myApp.colorDivisor, 242/myApp.colorDivisor, 255)
+    background.x = display.contentCenterX
+    background.y = display.contentCenterY
 	group:insert(background)
 	background:addEventListener("touch", ignoreTouch)
 
@@ -76,8 +78,11 @@ function scene:createScene(event)
 
     -- create embossed text to go above toolbar
     titleText = display.newText( "Corona Labs Menu", 0, 0, myApp.fontBold, 20 )
-    titleText:setTextColor( 255, 255, 255 )
-    titleText:setReferencePoint( display.CenterReferencePoint )
+    if myApp.isGraphics2 then
+        titleText:setFillColor(1, 1, 1)
+    else
+        titleText:setTextColor( 255, 255, 255 )
+    end
     titleText.x = display.contentCenterX
     titleText.y = titleBar.height * 0.5 + display.topStatusBarContentHeight
     group:insert(titleText)
@@ -86,7 +91,10 @@ function scene:createScene(event)
     	width = 160,
     	height = 40,
     	label = "Corona Blogs",
-        labelColor = { default = { 232, 153, 87, 255 }, over = { 202, 123, 77, 255} },
+        labelColor = { 
+            default = { 232/myApp.colorDivisor, 153/myApp.colorDivisor, 87/myApp.colorDivisor, 255/myApp.colorDivisor }, 
+            over = { 202/myApp.colorDivisor/myApp.colorDivisor, 123/myApp.colorDivisor, 77/myApp.colorDivisor, 255/myApp.colorDivisor} 
+        },
     	labelYOffset = -4, 
     	font = myApp.font,
     	fontSize = 18,
@@ -102,7 +110,10 @@ function scene:createScene(event)
     	width = 160,
     	height = 40,
     	label = "Photo Gallery",
-        labelColor = { default = { 232, 153, 87, 255 }, over = { 202, 123, 77, 255} },
+        labelColor = { 
+            default = { 232/myApp.colorDivisor, 153/myApp.colorDivisor, 87/myApp.colorDivisor, 255/myApp.colorDivisor }, 
+            over = { 202/myApp.colorDivisor, 123/myApp.colorDivisor, 77/myApp.colorDivisor, 255/myApp.colorDivisor} 
+        },
     	labelYOffset = -4, 
     	font = myApp.font,
     	fontSize = 18,
@@ -118,7 +129,10 @@ function scene:createScene(event)
     	width = 160,
     	height = 40,
     	label = "Corona Videos",
-        labelColor = { default = { 232, 153, 87, 255 }, over = { 202, 123, 77, 255} },
+        labelColor = { 
+            default = { 232/myApp.colorDivisor, 153/myApp.colorDivisor, 87/myApp.colorDivisor, 255/myApp.colorDivisor }, 
+            over = { 202/myApp.colorDivisor, 123/myApp.colorDivisor, 77/myApp.colorDivisor, 255/myApp.colorDivisor} 
+        },
     	labelYOffset = -4, 
     	font = myApp.font,
     	fontSize = 18,
@@ -133,7 +147,10 @@ function scene:createScene(event)
     	width = 160,
     	height = 40,
     	label = "Map",
-        labelColor = { default = { 232, 153, 87, 255 }, over = { 202, 123, 77, 255} },
+        labelColor = { 
+            default = { 232/myApp.colorDivisor, 153/myApp.colorDivisor, 87/myApp.colorDivisor, 255/myApp.colorDivisor }, 
+            over = { 202/myApp.colorDivisor, 123/myApp.colorDivisor, 77/myApp.colorDivisor, 255/myApp.colorDivisor} 
+        },
     	labelYOffset = -4, 
     	font = myApp.font,
     	fontSize = 18,

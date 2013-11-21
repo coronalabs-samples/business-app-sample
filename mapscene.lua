@@ -104,11 +104,11 @@ end
 local function setMode(event)
 	if event.phase == "ended" then
 		for i = 1, #views do
-			views[i]:setFillColor(255,255,192)
-			views[i].label:setTextColor(96, 96, 96)
+			views[i]:setFillColor(255/myApp.colorDivisor,255/myApp.colorDivisor,192/myApp.colorDivisor)
+			views[i].label:setTextColor(96/myApp.colorDivisor, 96/myApp.colorDivisor, 96/myApp.colorDivisor)
 		end
-		views[event.target.index]:setFillColor(255,255,224)
-		views[event.target.index].label:setTextColor(64, 64, 64)
+		views[event.target.index]:setFillColor(255/myApp.colorDivisor,255/myApp.colorDivisor,224/myApp.colorDivisor)
+		views[event.target.index].label:setTextColor(64/myApp.colorDivisor, 64/myApp.colorDivisor, 64/myApp.colorDivisor)
 		myMap.mapType = event.target.mode
 	end
 	return true
@@ -120,7 +120,7 @@ function scene:createScene(event)
 	local params = event.params
 
     local background = display.newRect(0,0,display.contentWidth, display.contentHeight)
-    background:setFillColor(242, 242, 242, 255)
+    background:setFillColor(242/myApp.colorDivisor, 242/myApp.colorDivisor, 242/myApp.colorDivisor, 255/myApp.colorDivisor)
     background.x = display.contentWidth / 2
     background.y = display.contentHeight / 2
 
@@ -143,8 +143,11 @@ function scene:createScene(event)
 
     -- create embossed text to go above toolbar
     titleText = display.newText( params.pageTitle, 0, 0, myApp.fontBold, 20 )
-    titleText:setTextColor( 255, 255, 255 )
-    titleText:setReferencePoint( display.CenterReferencePoint )
+    if myApp.isGraphics2 then
+	    titleText:setFillColor( 1, 1, 1 )
+    else
+	    titleText:setTextColor( 255, 255, 255 )
+	end
     titleText.x = display.contentCenterX
     titleText.y = titleBar.height * 0.5 + display.topStatusBarContentHeight
     group:insert(titleText)
@@ -158,7 +161,7 @@ function scene:createScene(event)
 	local mapbox = display.newRect(16, 16, mapWidth, mapHeight)
 	mapbox.x = display.contentCenterX
 	mapbox.y = display.contentCenterY
-	mapbox:setFillColor(128, 128, 128)
+	mapbox:setFillColor(128/myApp.colorDivisor, 128/myApp.colorDivisor, 128/myApp.colorDivisor)
 	group:insert(mapbox)
 
 
@@ -167,13 +170,17 @@ function scene:createScene(event)
 	views[1] = display.newRect(0,0,tabWidth,20)
 	views[1].x = display.contentCenterX - tabWidth
 	views[1].y = mapbox.y + (mapbox.height / 2) + 12
-	views[1]:setFillColor(255,255,224)
-	views[1]:setStrokeColor(224,224,192)
+	views[1]:setFillColor(255/myApp.colorDivisor,255/myApp.colorDivisor,224/myApp.colorDivisor)
+	views[1]:setStrokeColor(224/myApp.colorDivisor,224/myApp.colorDivisor,192/myApp.colorDivisor)
 	views[1].strokeWidth = 1
 	views[1].label = display.newText("Standard",0,0,myApp.font, 12 )
 	views[1].label.x = views[1].x
 	views[1].label.y = views[1].y - 3
-	views[1].label:setTextColor(64, 64, 64)
+	if myApp.isGraphics2 then
+		views[1].label:setFillColor(64/myApp.colorDivisor, 64/myApp.colorDivisor, 64/myApp.colorDivisor)
+	else
+		views[1].label:setTextColor(64/myApp.colorDivisor, 64/myApp.colorDivisor, 64/myApp.colorDivisor)
+	end
 	views[1].index = 1
 	views[1].mode = "standard"
 	group:insert(views[1])
@@ -182,13 +189,17 @@ function scene:createScene(event)
 	views[2] = display.newRect(0,0,tabWidth,20)
 	views[2].x = display.contentCenterX 
 	views[2].y = mapbox.y + (mapbox.height / 2) + 12
-	views[2]:setFillColor(255,255,192)
-	views[2]:setStrokeColor(224,224,192)
+	views[2]:setFillColor(255/myApp.colorDivisor,255/myApp.colorDivisor,192/myApp.colorDivisor)
+	views[2]:setStrokeColor(224/myApp.colorDivisor,224/myApp.colorDivisor,192/myApp.colorDivisor)
 	views[2].strokeWidth = 1
 	views[2].label = display.newText("Satellite",0,0,myApp.font, 12 )
 	views[2].label.x = views[2].x
 	views[2].label.y = views[2].y - 3
-	views[2].label:setTextColor(96, 96, 96)
+	if myApp.isGraphics2 then
+		views[2].label:setFillColor(96/myApp.colorDivisor, 96/myApp.colorDivisor, 96/myApp.colorDivisor)
+	else
+		views[2].label:setTextColor(96/myApp.colorDivisor, 96/myApp.colorDivisor, 96/myApp.colorDivisor)
+	end
 	views[2].index = 2
 	views[2].mode = "satellite"
 	group:insert(views[2])
@@ -197,13 +208,17 @@ function scene:createScene(event)
 	views[3] = display.newRect(0,0,tabWidth,20)
 	views[3].x = display.contentCenterX + tabWidth
 	views[3].y = mapbox.y + (mapbox.height / 2) + 12
-	views[3]:setFillColor(255,255,192)
-	views[3]:setStrokeColor(224,224,192)
+	views[3]:setFillColor(255/myApp.colorDivisor,255/myApp.colorDivisor,192/myApp.colorDivisor)
+	views[3]:setStrokeColor(224/myApp.colorDivisor,224/myApp.colorDivisor,192/myApp.colorDivisor)
 	views[3].strokeWidth = 1
 	views[3].label = display.newText("Hybrid",0,0,myApp.font, 12 )
 	views[3].label.x = views[3].x
 	views[3].label.y = views[3].y - 3
-	views[3].label:setTextColor(96, 96, 96)
+	if myApp.isGraphics2 then
+		views[3].label:setFillColor(96/myApp.colorDivisor, 96/myApp.colorDivisor, 96/myApp.colorDivisor)
+	else
+		views[3].label:setTextColor(96/myApp.colorDivisor, 96/myApp.colorDivisor, 96/myApp.colorDivisor)
+	end
 	views[3].index = 3
 	views[3].mode = "hybrid"
 	group:insert(views[3])

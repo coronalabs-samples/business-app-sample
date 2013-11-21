@@ -99,8 +99,11 @@ function scene:createScene( event )
 
     -- create embossed text to go above toolbar
     titleText = display.newText( "Photo Gallery", 0, 0, myApp.fontBold, 20 )
-    titleText:setTextColor( 255, 255, 255 )
-    titleText:setReferencePoint( display.CenterReferencePoint )
+    if myApp.isGraphics2 then
+        titleText:setFillColor(1)
+    else
+        titleText:setTextColor( 255, 255, 255 )
+    end
     titleText.x = display.contentCenterX
     titleText.y = titleBar.height * 0.5 + display.topStatusBarContentHeight
     group:insert(titleText)
@@ -109,6 +112,11 @@ function scene:createScene( event )
     local col = 0
 
     local thumbnailMask = graphics.newMask("images/mask-80x80.png")
+
+    local groupOffset = 0
+    if tonumber( system.getInfo("build") ) < 2013.2000 then
+        groupOffset = 40
+    end
 
     for i = 1, #photoFiles do
     	photosThumbnails[i] = display.newImage(photoFiles[i])
@@ -122,15 +130,14 @@ function scene:createScene( event )
     	--print(scale, aspectRatio, photosThumbnails[i].width, photosThumbnails[i].width * scale, photosThumbnails[i].height, photosThumbnails[i].height * scale)
    		photosThumbnails[i]:scale(scale,scale)
    		photosThumbGroups[i] = display.newGroup()
-   		photosThumbnails[i].x = 40 --col * 80 + 40
-   		photosThumbnails[i].y = 40 --row * 80 + 40 + 70
+   		photosThumbnails[i].x = groupOffset --col * 80 + 40
+   		photosThumbnails[i].y = groupOffset --row * 80 + 40 + 70
    		photosThumbGroups[i]:insert(photosThumbnails[i])
-		photosThumbGroups[i]:setReferencePoint(display.CenterReferencePoint)
 		photosThumbGroups[i].x = col * 80 + 40
 		photosThumbGroups[i].y = row * 80 + 40 + 70
 		photosThumbGroups[i]:setMask(thumbnailMask)
-		photosThumbGroups[i].maskX = 40 
-		photosThumbGroups[i].maskY = 40 
+		photosThumbGroups[i].maskX = groupOffset
+		photosThumbGroups[i].maskY = groupOffset 
 		photosThumbGroups[i].index = i
 		photosThumbGroups[i]:addEventListener("touch", showPhoto)
 		col = col + 1
