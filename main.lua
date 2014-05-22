@@ -36,9 +36,9 @@ DEALINGS IN THE SOFTWARE.
 --display.setStatusBar( display.HiddenStatusBar )
 
 --
--- load in storyboard
+-- load in composer
 --
-local storyboard = require ( "storyboard" )
+local composer = require ( "composer" )
 local widget = require( "widget" )
 local json = require( "json" )
 local myApp = require( "myapp" ) 
@@ -49,16 +49,6 @@ end
 
 if display.contentWidth > 320 then
     myApp.is_iPad = true
-end
-
---
--- Handle Graphics 2.0 changes
-myApp.colorDivisor = 255
-myApp.isGraphics2 = true
-if tonumber( system.getInfo("build") ) < 2013.2000 then
-    -- we are a Graphics 1.0 build
-    myApp.colorDivisor = 1
-    myApp.isGraphics2 = false
 end
 
 --
@@ -134,10 +124,10 @@ widget.setTheme(myApp.theme)
 -- pageTitle is the thing that shows at the top of the list view.
 --
 --
--- The variable "storyboard" is just a Lua table that is returned from the 
--- require("storyboard" above.  As such, I can freely add members/attributes/entries
+-- The variable "composer" is just a Lua table that is returned from the 
+-- require("composer" above.  As such, I can freely add members/attributes/entries
 -- to the table.  By using this technique, I can quickly pass data between 
--- storyboard scenes.  It's like making them global without the penalties of 
+-- composer scenes.  It's like making them global without the penalties of 
 -- making them global.  There is one catch... Corona Labs could come along and 
 -- add theor own "displayMode" member (or any of them) later and trump yours
 -- but the risk is minmal.
@@ -147,12 +137,12 @@ myApp.tabBar = {}
 
 function myApp.showScreen1()
     myApp.tabBar:setSelected(1)
-    storyboard.removeAll()
-    storyboard.gotoScene("menu", {time=250, effect="crossFade"})
+    composer.removeHidden()
+    composer.gotoScene("menu", {time=250, effect="crossFade"})
     return true
 end
 
-function myApp.showScreen2()
+function myApp.showScreen2(event)
     myApp.tabBar:setSelected(2)
     local options = {
         feedName = "corona.rss",
@@ -161,15 +151,15 @@ function myApp.showScreen2()
         displayMode = "webpage",
         pageTitle = "Corona Labs"
     }
-    storyboard.removeAll()
-    storyboard.gotoScene("feed", {time=250, effect="crossFade", params = options})
+    composer.removeHidden()
+    composer.gotoScene("feed", {time=250, effect="crossFade", params = options})
     return true
 end
 
 function myApp.showScreen3()
     myApp.tabBar:setSelected(3)
-    storyboard.removeAll()
-    storyboard.gotoScene("photogallery", {time=250, effect="crossFade"})
+    composer.removeHidden()
+    composer.gotoScene("photogallery", {time=250, effect="crossFade"})
     return true
 end
 
@@ -182,8 +172,8 @@ function myApp.showScreen4()
         displayMode = "videoviewer",
         pageTitle = "Corona Videos"
     }
-    storyboard.removeAll()
-    storyboard.gotoScene("feed2", {time=250, effect="crossFade", params = options})
+    composer.removeHidden()
+    composer.gotoScene("feed2", {time=250, effect="crossFade", params = options})
     return true
 end
 
@@ -193,8 +183,8 @@ function myApp.showScreen5()
 
         pageTitle = "Corona Headquarters"
     }
-    storyboard.removeAll()
-    storyboard.gotoScene("mapscene", {time=250, effect="crossFade", params = options})
+    composer.removeHidden()
+    composer.gotoScene("mapscene", {time=250, effect="crossFade", params = options})
     return true
 end
 
@@ -214,21 +204,21 @@ local tabButtons = {
         defaultFile = "images/tabbaricon.png",
         overFile = "images/tabbaricon-down.png",
         labelColor = { 
-            default = { 64/myApp.colorDivisor, 64/myApp.colorDivisor, 64/myApp.colorDivisor }, 
-            over = { 196/myApp.colorDivisor, 132/myApp.colorDivisor, 64/myApp.colorDivisor }
+            default = { 0.25, 0.25, 0.25 }, 
+            over = { 0.768, 0.516, 0.25 }
         },
         width = 32,
         height = 32,
         onPress = myApp.showScreen1,
-        selected = true
+        selected = true,
     },
     {
         label = "Blogs",
         defaultFile = "images/tabbaricon.png",
         overFile = "images/tabbaricon-down.png",
         labelColor = { 
-            default = { 64/myApp.colorDivisor, 64/myApp.colorDivisor, 64/myApp.colorDivisor }, 
-            over = { 196/myApp.colorDivisor, 132/myApp.colorDivisor, 64/myApp.colorDivisor }
+            default = { 0.25, 0.25, 0.25 }, 
+            over = { 0.768, 0.516, 0.25 }
         },
         width = 32,
         height = 32,
@@ -239,8 +229,8 @@ local tabButtons = {
         defaultFile = "images/tabbaricon.png",
         overFile = "images/tabbaricon-down.png",
         labelColor = { 
-            default = { 64/myApp.colorDivisor, 64/myApp.colorDivisor, 64/myApp.colorDivisor }, 
-            over = { 196/myApp.colorDivisor, 132/myApp.colorDivisor, 64/myApp.colorDivisor }
+            default = { 0.25, 0.25, 0.25 }, 
+            over = { 0.768, 0.516, 0.25 }
         },
         width = 32,
         height = 32,
@@ -251,8 +241,8 @@ local tabButtons = {
         defaultFile = "images/tabbaricon.png",
         overFile = "images/tabbaricon-down.png",
         labelColor = { 
-            default = { 64/myApp.colorDivisor, 64/myApp.colorDivisor, 64/myApp.colorDivisor }, 
-            over = { 196/myApp.colorDivisor, 132/myApp.colorDivisor, 64/myApp.colorDivisor }
+            default = { 0.25, 0.25, 0.25 }, 
+            over = { 0.768, 0.516, 0.25 }
         },
         width = 32,
         height = 32,
@@ -263,13 +253,13 @@ local tabButtons = {
         defaultFile = "images/tabbaricon.png",
         overFile = "images/tabbaricon-down.png",
         labelColor = { 
-            default = { 64/myApp.colorDivisor, 64/myApp.colorDivisor, 64/myApp.colorDivisor }, 
-            over = { 196/myApp.colorDivisor, 132/myApp.colorDivisor, 64/myApp.colorDivisor }
+            default = { 0.25, 0.25, 0.25 }, 
+            over = { 0.768, 0.516, 0.25 }
         },
         width = 32,
         height = 32,
         onPress = myApp.showScreen5,
-    }
+    },
 }
 
 myApp.tabBar = widget.newTabBar{
@@ -289,7 +279,7 @@ myApp.tabBar = widget.newTabBar{
 
 
 local background = display.newRect(0,0, display.contentWidth, display.contentHeight)
-background:setFillColor(255/myApp.colorDivisor,255/myApp.colorDivisor,255/myApp.colorDivisor)
+background:setFillColor( 1, 1, 1 )
 background.x = display.contentCenterX
 background.y = display.contentCenterY
 
@@ -298,11 +288,7 @@ logo.x = display.contentCenterX
 logo.y = display.contentCenterY
 
 local title = display.newText("Business Sample App", 0, 0, myApp.fontBold, 28)
-if myApp.isGraphics2 then
-    title:setFillColor( 0 )
-else
-    title:setTextColor(0)
-end
+title:setFillColor( 0, 0, 0 )
 title.x = display.contentCenterX
 title.y = display.contentHeight - 64
 --

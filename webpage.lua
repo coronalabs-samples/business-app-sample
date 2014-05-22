@@ -34,8 +34,8 @@ DEALINGS IN THE SOFTWARE.
 ]]--
 ---------------------------------------------------------------------------------------
 
-local storyboard = require( "storyboard" )
-local scene = storyboard.newScene()
+local composer = require( "composer" )
+local scene = composer.newScene()
 
 local widget = require("widget")
 local myApp = require("myapp")
@@ -45,14 +45,17 @@ widget.setTheme(myApp.theme)
 local playButton
 local webView
 local backButton
+local navBar
 
 local function goBack(event)
-    storyboard.hideOverlay()
+    if event.phase == "ended" then
+        composer.hideOverlay( "slideRight", 250)
+    end
     return true
 end
 
-function scene:createScene( event )
-    local group = self.view
+function scene:create( event )
+    local sceneGroup = self.view
 
     local story = event.params.story
         
@@ -63,169 +66,150 @@ function scene:createScene( event )
 
     print("create scene")
     local background = display.newRect(0,0,display.contentWidth, display.contentHeight)
-    background:setFillColor(242/myApp.colorDivisor, 242/myApp.colorDivisor, 242/myApp.colorDivisor, 255/myApp.colorDivisor)
-    background.x = display.contentWidth / 2
-    background.y = display.contentHeight / 2
+    background:setFillColor( 0.95, 0.95, 0.95 )
+    background.x = display.contentCenterX
+    background.y = display.contentCenterY
 
-    group:insert(background)
-
-    local statusBarBackground = display.newImageRect(myApp.topBarBg, display.contentWidth, display.topStatusBarContentHeight)
-    statusBarBackground.x = display.contentCenterX
-    statusBarBackground.y = display.topStatusBarContentHeight * 0.5
-    group:insert(statusBarBackground)
+    sceneGroup:insert(background)
 
     local title = story.title
     if title and title:len() > 16 then
         title = title:sub(1,16) .. "..."
     end
 
-    --
-    -- Create the other UI elements
-    -- create toolbar to go at the top of the screen
-    local titleBar = display.newImageRect(myApp.topBarBg, display.contentWidth, 50)
-    titleBar.x = display.contentCenterX
-    titleBar.y = 25 + display.topStatusBarContentHeight
-    group:insert(titleBar)
-
-
-    print(title)
-
-    -- create embossed text to go above toolbar
-    titleText = display.newText( title, 0, 0, myApp.fontBold, 20 )
-    if myApp.isGraphics2 then
-        titleText:setFillColor(1, 1, 1)
-    else
-        titleText:setTextColor( 255, 255, 255 )
-    end
-    titleText.x = display.contentCenterX
-    titleText.y = titleBar.height * 0.5 + display.topStatusBarContentHeight
-    group:insert(titleText)
-
-    backButton = widget.newButton({
-        width =  59,
+    local leftButton = {
+        onEvent = goBack,
+        width = 59,
         height = 32,
         defaultFile = "images/backbutton7_white.png",
-        overFile = "images/backbutton7_white.png",
-        onRelease = goBack
+        overFile = "images/backbutton7_white.png"
+    }
+
+    navBar = widget.newNavigationBar({
+        title = title,
+        backgroundColor = { 0.96, 0.62, 0.34 },
+        titleColor = {1, 1, 1},
+        font = "HelveticaNeue",
+        leftButton = leftButton,
     })
-    backButton.y = titleBar.y
-    backButton.x = 32
-    group:insert(backButton)
+    sceneGroup:insert(navBar)
 
 end
 
-function scene:enterScene( event )
-    local group = self.view
+function scene:show( event )
+    local sceneGroup = self.view
 
     -- load the story data in from global space, was put there in feed.lua
     local story = event.params.story
 
-    local title = story.title
-    if title then
-        if title:len() > 16 then
-            title = title:sub(1,16) .. "..."
-        end
-    else
-        title = "Corona Labs"
-    end
-    titleText.text = title
+    if event.phase == "did" then
 
-    -- if the reader choses to see the article in the web browser, open it.
-    
-    local function viewWebPage(event)
-        system.openURL( story.link )
-    end
-
-    -- now we write out the story body, which likely has HTML code in it to a
-    -- temporary file that we will load back in to our web view.
-    
-    local path = system.pathForFile( "story.html", system.TemporaryDirectory )
- 
-    -- io.open opens a file at path. returns nil if no file found
-    local fh, errStr = io.open( path, "w" )
- 
-    -- 
-    -- Write out the required headers to make sure the content fits into our
-    -- window and then dump the body.
-    --
-    if fh then
-        print( "Created file" )
-        fh:write("<!doctype html>\n<html>\n<head>\n<meta charset=\"utf-8\">")
-        fh:write("<meta name=\"viewport\" content=\"width=320; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;\"/>\n")
-        fh:write("<style type=\"text/css\">\n html { -webkit-text-size-adjust: none; font-family: HelveticaNeue-Light, Helvetica, Droid-Sans, Arial, san-serif; font-size: 1.1em; } h1 {font-size:1.25em;} p {font-size:0.9em; } </style>")
-        fh:write("</head>\n<body>\n")
-        if story.title then
-            fh:write("<h1>" .. story.title .. "</h1>\n")
+        local title = story.title
+        if title then
+            if title:len() > 16 then
+                title = title:sub(1,16) .. "..."
+            end
+        else
+            title = "Corona Labs"
         end
-        if story.content_encoded then
-            fh:write( story.content_encoded)
-        elseif story.description then
-            fh:write(story.description)
-        end
-        fh:write( "\n</body>\n</html>\n" )
-        io.close( fh )
-    else
-        print( "Create file failed!" )
-    end
+        navBar:setLabel( title )
 
-    --
-    -- handler to deal with clicking on any anchor tags in the above HTML.
-    --
-    local function webListener(event)
-        print("showWebPopup callback")
+        -- if the reader choses to see the article in the web browser, open it.
         
-        local url = event.url
-
-        if( string.find( url, "http:" ) ~= nil or string.find( url, "mailto:" ) ~= nil ) then
-            print("url: ".. url)
-            system.openURL(url)
+        local function viewWebPage(event)
+            system.openURL( story.link )
         end
 
-        return true
-    end
-   
-    local isTall = 0
-    if myApp.isTall then
-        isTall = 88
-    end
+        -- now we write out the story body, which likely has HTML code in it to a
+        -- temporary file that we will load back in to our web view.
+        
+        local path = system.pathForFile( "story.html", system.TemporaryDirectory )
+     
+        -- io.open opens a file at path. returns nil if no file found
+        local fh, errStr = io.open( path, "w" )
+     
+        -- 
+        -- Write out the required headers to make sure the content fits into our
+        -- window and then dump the body.
+        --
+        if fh then
+            print( "Created file" )
+            fh:write("<!doctype html>\n<html>\n<head>\n<meta charset=\"utf-8\">")
+            fh:write("<meta name=\"viewport\" content=\"width=320; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;\"/>\n")
+            fh:write("<style type=\"text/css\">\n html { -webkit-text-size-adjust: none; font-family: HelveticaNeue-Light, Helvetica, Droid-Sans, Arial, san-serif; font-size: 1.1em; } h1 {font-size:1.25em;} p {font-size:0.9em; } </style>")
+            fh:write("</head>\n<body>\n")
+            if story.title then
+                fh:write("<h1>" .. story.title .. "</h1>\n")
+            end
+            if story.content_encoded then
+                fh:write( story.content_encoded)
+            elseif story.description then
+                fh:write(story.description)
+            end
+            fh:write( "\n</body>\n</html>\n" )
+            io.close( fh )
+        else
+            print( "Create file failed!" )
+        end
 
-    -- turn off the activity indicator and show the webview
-    --native.setActivityIndicator( false )
---    local options = { hasBackground=false, baseUrl=system.TemporaryDirectory, urlRequest=listener }
-    --local options = { hasBackground=true,  urlRequest=listener }
---    native.showWebPopup(0, 51 + 60 + 20 + 60, display.contentWidth, 220 + isTall, "story.html", options )
-    
-    webView = native.newWebView(0, 71, display.contentWidth, 300 + isTall)
-    webView:request("story.html", system.TemporaryDirectory)
-    webView.x = display.contentCenterX
-    webView.y = 150 + isTall / 2 + 71
+        --
+        -- handler to deal with clicking on any anchor tags in the above HTML.
+        --
+        local function webListener(event)
+            print("showWebPopup callback")
+            
+            local url = event.url
 
-    webView:addEventListener( "urlRequest", webListener )
-    -- add a button to see the full article in the web browser
-    local play_button = display.newImageRect("images/view_button.png", 300, 32)
-    play_button.x = display.contentCenterX
-    play_button.y = display.contentHeight - 80
-    group:insert(play_button)
-    play_button:addEventListener("tap", viewWebPage)
-              
+            if( string.find( url, "http:" ) ~= nil or string.find( url, "mailto:" ) ~= nil ) then
+                print("url: ".. url)
+                system.openURL(url)
+            end
+
+            return true
+        end
+       
+        local isTall = 0
+        if myApp.isTall then
+            isTall = 88
+        end
+
+        -- turn off the activity indicator and show the webview
+        --native.setActivityIndicator( false )
+    --    local options = { hasBackground=false, baseUrl=system.TemporaryDirectory, urlRequest=listener }
+        --local options = { hasBackground=true,  urlRequest=listener }
+    --    native.showWebPopup(0, 51 + 60 + 20 + 60, display.contentWidth, 220 + isTall, "story.html", options )
+        
+        webView = native.newWebView(0, 71, display.contentWidth, 300 + isTall)
+        webView:request("story.html", system.TemporaryDirectory)
+        webView.x = display.contentCenterX
+        webView.y = 150 + isTall / 2 + 71
+
+        webView:addEventListener( "urlRequest", webListener )
+        -- add a button to see the full article in the web browser
+        local play_button = display.newImageRect("images/view_button.png", 300, 32)
+        play_button.x = display.contentCenterX
+        play_button.y = display.contentHeight - 80
+        sceneGroup:insert(play_button)
+        play_button:addEventListener("tap", viewWebPage)
+    end              
 end
 
-function scene:exitScene( event )
-    local group = self.view
+function scene:hide( event )
+    local sceneGroup = self.view
 
     --
     -- Clean up any native objects and Runtime listeners, timers, etc.
     --
-    
-    if webView and webView.removeSelf then
-        webView:removeSelf()
-        webView = nil
+    if event.phase == "will" then
+        if webView and webView.removeSelf then
+            webView:removeSelf()
+            webView = nil
+        end
     end
-   
 end
 
-function scene:destoryScene( event )
-    local group = self.view
+function scene:destroy( event )
+    local sceneGroup = self.view
     
 end
 
@@ -234,19 +218,10 @@ end
 -- END OF YOUR IMPLEMENTATION
 ---------------------------------------------------------------------------------
 
--- "createScene" event is dispatched if scene's view does not exist
-scene:addEventListener( "createScene", scene )
-
--- "enterScene" event is dispatched whenever scene transition has finished
-scene:addEventListener( "enterScene", scene )
-
--- "exitScene" event is dispatched before next scene's transition begins
-scene:addEventListener( "exitScene", scene )
-
--- "destroyScene" event is dispatched before view is unloaded, which can be
--- automatically unloaded in low memory situations, or explicitly via a call to
--- storyboard.purgeScene() or storyboard.removeScene().
-scene:addEventListener( "destroyScene", scene )
+scene:addEventListener( "create", scene )
+scene:addEventListener( "show", scene )
+scene:addEventListener( "hide", scene )
+scene:addEventListener( "destroy", scene )
 
 ---------------------------------------------------------------------------------
 

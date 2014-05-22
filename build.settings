@@ -25,17 +25,17 @@ settings =
                 "Icon-Small-50@2x.png", 
             },
         },
-   },
-   orientation =
-   {
-      default = "portrait",
-      supported =
-      {
-         "portait", "portraitUpsideDown", 
-      },
-   },
-   android =
-   {
+    },
+    orientation =
+    {
+        default = "portrait",
+        supported =
+        {
+            "portait", "portraitUpsideDown", 
+        },
+    },
+    android =
+    {
         usesPermissions =
         {
             -- Required by the MapView to fetch its contents from the Google Maps servers.
@@ -57,5 +57,21 @@ settings =
             { name = "android.hardware.location.gps", required = false },
             { name = "android.hardware.location.network", required = false },
         },
-   }
+    },
+    --[[
+    -- enable the admob plugin
+    plugins =
+    {
+        ["CoronaProvider.ads.admob"] =
+        {
+            -- required
+            publisherId = "com.coronalabs",
+        },
+        ["CoronaProvider.native.popup.social"] =
+        {
+            -- required
+            publisherId = "com.coronalabs",
+        },
+    },  
+    --]]
 }

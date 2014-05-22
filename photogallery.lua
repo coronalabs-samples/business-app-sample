@@ -33,8 +33,8 @@ DEALINGS IN THE SOFTWARE.
 
 ]]--
 ---------------------------------------------------------------------------------------
-local storyboard = require( "storyboard" )
-local scene = storyboard.newScene()
+local composer = require( "composer" )
+local scene = composer.newScene()
 
 local widget = require("widget")
 local myApp = require("myapp")
@@ -66,47 +66,28 @@ local photosThumbGroups = {}
 
 local function showPhoto(event)
 	if event.phase == "ended" then
-        storyboard.showOverlay("slideView", {time=250, effect="crossFade", params={start=event.target.index, images=photoFiles}})
+        composer.showOverlay("slideView", {time=250, effect="crossFade", params={start=event.target.index, images=photoFiles}})
 	end
 	return true
 end
 
-function scene:createScene( event )
-    local group = self.view
+function scene:create( event )
+    local sceneGroup = self.view
 
     local background = display.newRect(0,0,display.contentWidth, display.contentHeight)
-    background:setFillColor(242, 242, 242, 255)
+    background:setFillColor( 0.95, 0.95, 0.95 )
     background.x = display.contentWidth / 2
     background.y = display.contentHeight / 2
 
-    group:insert(background)
+    sceneGroup:insert(background)
 
-    local statusBarBackground = display.newImageRect(myApp.topBarBg, display.contentWidth, display.topStatusBarContentHeight)
-    statusBarBackground.x = display.contentCenterX
-    statusBarBackground.y = display.topStatusBarContentHeight * 0.5
-    group:insert(statusBarBackground)
-    --
-    -- Create the other UI elements
-    -- create toolbar to go at the top of the screen
-    local titleBar = display.newImageRect(myApp.topBarBg, display.contentWidth, 50)
-    titleBar.x = display.contentCenterX
-    titleBar.y = 25 + display.topStatusBarContentHeight
-    group:insert(titleBar)
-
-    --
-    -- set up the text for the title bar, will be changed based on what page
-    -- the viewer is on
-
-    -- create embossed text to go above toolbar
-    titleText = display.newText( "Photo Gallery", 0, 0, myApp.fontBold, 20 )
-    if myApp.isGraphics2 then
-        titleText:setFillColor(1)
-    else
-        titleText:setTextColor( 255, 255, 255 )
-    end
-    titleText.x = display.contentCenterX
-    titleText.y = titleBar.height * 0.5 + display.topStatusBarContentHeight
-    group:insert(titleText)
+    local navBar = widget.newNavigationBar({
+        title = "Photo Gallery",
+        backgroundColor = { 0.96, 0.62, 0.34 },
+        titleColor = {1, 1, 1},
+        font = "HelveticaNeue"
+    })
+    sceneGroup:insert(navBar)
 
     local row = 0
     local col = 0
@@ -145,19 +126,19 @@ function scene:createScene( event )
 			row = row + 1
 			col = 0
 		end
-		group:insert(photosThumbGroups[i])
+		sceneGroup:insert(photosThumbGroups[i])
 
     end
     print("Memory", system.getInfo("textureMemoryUsed") / (1024 * 1024))
 end
 
-function scene:enterScene( event )
-    local group = self.view
+function scene:show( event )
+    local sceneGroup = self.view
     
 end
 
-function scene:exitScene( event )
-    local group = self.view
+function scene:hide( event )
+    local sceneGroup = self.view
 
     --
     -- Clean up any native objects and Runtime listeners, timers, etc.
@@ -165,8 +146,8 @@ function scene:exitScene( event )
     
 end
 
-function scene:destoryScene( event )
-    local group = self.view
+function scene:destroy( event )
+    local sceneGroup = self.view
     
 end
 
@@ -175,10 +156,10 @@ end
 -- END OF YOUR IMPLEMENTATION
 ---------------------------------------------------------------------------------
 
-scene:addEventListener( "createScene", scene )
-scene:addEventListener( "enterScene", scene )
-scene:addEventListener( "exitScene", scene )
-scene:addEventListener( "destroyScene", scene )
+scene:addEventListener( "create", scene )
+scene:addEventListener( "show", scene )
+scene:addEventListener( "hide", scene )
+scene:addEventListener( "destroy", scene )
 
 ---------------------------------------------------------------------------------
 

@@ -34,10 +34,11 @@ DEALINGS IN THE SOFTWARE.
 ]]--
 ---------------------------------------------------------------------------------------
 
-local storyboard = require( "storyboard" )
-local scene = storyboard.newScene()
+local composer = require( "composer" )
+local scene = composer.newScene()
 
 local widget = require( "widget" )
+local widgetExtras = require("widget-extras")
 local myApp = require( "myapp" )
 
 widget.setTheme(myApp.theme)
@@ -51,49 +52,32 @@ local function ignoreTouch( event )
 	return true
 end
 
-function scene:createScene(event)
-	local group = self.view
+function scene:create( event )
+	local sceneGroup = self.view
 
 	local background = display.newRect(0,0,display.contentWidth, display.contentHeight)
-	background:setFillColor(242/myApp.colorDivisor, 242/myApp.colorDivisor, 242/myApp.colorDivisor, 255)
+	background:setFillColor( 0.95, 0.95, 0.95 )
     background.x = display.contentCenterX
     background.y = display.contentCenterY
-	group:insert(background)
+	sceneGroup:insert(background)
 	background:addEventListener("touch", ignoreTouch)
 
-    local statusBarBackground = display.newImageRect(myApp.topBarBg, display.contentWidth, display.topStatusBarContentHeight)
-    statusBarBackground.x = display.contentCenterX
-    statusBarBackground.y = display.topStatusBarContentHeight * 0.5
-    group:insert(statusBarBackground)
-    --
-    -- Create the other UI elements
-    -- create toolbar to go at the top of the screen
-    local titleBar = display.newImageRect(myApp.topBarBg, display.contentWidth, 50)
-    titleBar.x = display.contentCenterX
-    titleBar.y = 25 + display.topStatusBarContentHeight
-    group:insert(titleBar)
-    --
-    -- set up the text for the title bar, will be changed based on what page
-    -- the viewer is on
+    local navBar = widget.newNavigationBar({
+        title = "Corona Labs Menu",
+        backgroundColor = { 0.96, 0.62, 0.34 },
+        titleColor = {1, 1, 1},
+        font = "HelveticaNeue"
+    })
+    sceneGroup:insert(navBar)
 
-    -- create embossed text to go above toolbar
-    titleText = display.newText( "Corona Labs Menu", 0, 0, myApp.fontBold, 20 )
-    if myApp.isGraphics2 then
-        titleText:setFillColor(1, 1, 1)
-    else
-        titleText:setTextColor( 255, 255, 255 )
-    end
-    titleText.x = display.contentCenterX
-    titleText.y = titleBar.height * 0.5 + display.topStatusBarContentHeight
-    group:insert(titleText)
 
     local button1 = widget.newButton({
     	width = 160,
     	height = 40,
     	label = "Corona Blogs",
         labelColor = { 
-            default = { 232/myApp.colorDivisor, 153/myApp.colorDivisor, 87/myApp.colorDivisor, 255/myApp.colorDivisor }, 
-            over = { 202/myApp.colorDivisor/myApp.colorDivisor, 123/myApp.colorDivisor, 77/myApp.colorDivisor, 255/myApp.colorDivisor} 
+            default = { 0.90, 0.60, 0.34 }, 
+            over = { 0.79, 0.48, 0.30 } 
         },
     	labelYOffset = -4, 
     	font = myApp.font,
@@ -101,7 +85,7 @@ function scene:createScene(event)
     	emboss = false,
     	onRelease = myApp.showScreen2
     })
-    group:insert(button1)
+    sceneGroup:insert(button1)
     button1.x = display.contentCenterX
     button1.y = display.contentCenterY - 120
 
@@ -111,8 +95,8 @@ function scene:createScene(event)
     	height = 40,
     	label = "Photo Gallery",
         labelColor = { 
-            default = { 232/myApp.colorDivisor, 153/myApp.colorDivisor, 87/myApp.colorDivisor, 255/myApp.colorDivisor }, 
-            over = { 202/myApp.colorDivisor, 123/myApp.colorDivisor, 77/myApp.colorDivisor, 255/myApp.colorDivisor} 
+            default = { 0.90, 0.60, 0.34 }, 
+            over = { 0.79, 0.48, 0.30 } 
         },
     	labelYOffset = -4, 
     	font = myApp.font,
@@ -120,7 +104,7 @@ function scene:createScene(event)
     	emboss = false,
     	onRelease = myApp.showScreen3
     })
-    group:insert(button2)
+    sceneGroup:insert(button2)
     button2.x = display.contentCenterX
     button2.y = display.contentCenterY - 40
 
@@ -130,8 +114,8 @@ function scene:createScene(event)
     	height = 40,
     	label = "Corona Videos",
         labelColor = { 
-            default = { 232/myApp.colorDivisor, 153/myApp.colorDivisor, 87/myApp.colorDivisor, 255/myApp.colorDivisor }, 
-            over = { 202/myApp.colorDivisor, 123/myApp.colorDivisor, 77/myApp.colorDivisor, 255/myApp.colorDivisor} 
+            default = { 0.90, 0.60, 0.34 }, 
+            over = { 0.79, 0.48, 0.30 } 
         },
     	labelYOffset = -4, 
     	font = myApp.font,
@@ -139,7 +123,7 @@ function scene:createScene(event)
     	emboss = false,
     	onRelease = myApp.showScreen4
     })
-    group:insert(button3)
+    sceneGroup:insert(button3)
     button3.x = display.contentCenterX
     button3.y = display.contentCenterY + 40
 
@@ -148,8 +132,8 @@ function scene:createScene(event)
     	height = 40,
     	label = "Map",
         labelColor = { 
-            default = { 232/myApp.colorDivisor, 153/myApp.colorDivisor, 87/myApp.colorDivisor, 255/myApp.colorDivisor }, 
-            over = { 202/myApp.colorDivisor, 123/myApp.colorDivisor, 77/myApp.colorDivisor, 255/myApp.colorDivisor} 
+            default = { 0.90, 0.60, 0.34 }, 
+            over = { 0.79, 0.48, 0.30 } 
         },
     	labelYOffset = -4, 
     	font = myApp.font,
@@ -157,19 +141,18 @@ function scene:createScene(event)
     	emboss = false,
     	onRelease = myApp.showScreen5
     })
-    group:insert(button4)
+    sceneGroup:insert(button4)
     button4.x = display.contentCenterX
     button4.y = display.contentCenterY + 120
+end
+
+function scene:show( event )
+	local sceneGroup = self.view
 
 end
 
-function scene:enterScene( event )
-	local group = self.view
-
-end
-
-function scene:exitScene( event )
-	local group = self.view
+function scene:hide( event )
+	local sceneGroup = self.view
 
 	--
 	-- Clean up native objects
@@ -177,13 +160,13 @@ function scene:exitScene( event )
 
 end
 
-function scene:destroyScene( event )
-	local group = self.view
+function scene:destroy( event )
+	local sceneGroup = self.view
 end
 
-scene:addEventListener( "createScene", scene )
-scene:addEventListener( "enterScene", scene )
-scene:addEventListener( "exitScene", scene )
-scene:addEventListener( "destroyScene", scene )
+scene:addEventListener( "create", scene )
+scene:addEventListener( "show", scene )
+scene:addEventListener( "hide", scene )
+scene:addEventListener( "destroy", scene )
 
 return scene

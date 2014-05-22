@@ -22,8 +22,8 @@
 -- DEALINGS IN THE SOFTWARE.
 
 
-local storyboard = require( "storyboard" )
-local scene = storyboard.newScene()
+local composer = require( "composer" )
+local scene = composer.newScene()
 
 local widget = require("widget")
 
@@ -42,16 +42,18 @@ local imageNumberText, imageNumberTextShadow
 local backbutton
 
 
-local function goBack(event)
+local function goBack( event )
 	print(event.phase)
 	if event.phase == "ended" then
-		storyboard.hideOverlay()
+		composer.hideOverlay( "crossFade", 250 )
 	end
 	return true
 end
 
 --function new( imageSet, slideBackground, top, bottom )	
-function scene:createScene( event )
+function scene:create( event )
+	local sceneGroup = self.view
+
 	local pad = 0
 	local top = top or 0
 	local bottom = bottom or 0
@@ -65,48 +67,49 @@ function scene:createScene( event )
 
 	viewableScreenW = display.contentWidth
 	viewableScreenH = display.contentHeight - 120 -- status bar + top bar + tabBar
-
-	g = self.view
 		
     local background = display.newRect(0,0,display.contentWidth, display.contentHeight)
-    background:setFillColor(242/myApp.colorDivisor, 242/myApp.colorDivisor, 242/myApp.colorDivisor, 255/myApp.colorDivisor)
+    background:setFillColor( 0.95, 0.95, 0.95 )
     background.x = display.contentWidth / 2
     background.y = display.contentHeight / 2
 
-    g:insert(background)
+    sceneGroup:insert(background)
 
-    local statusBarBackground = display.newImageRect(myApp.topBarBg, display.contentWidth, display.topStatusBarContentHeight)
-    statusBarBackground.x = display.contentCenterX
-    statusBarBackground.y = display.topStatusBarContentHeight * 0.5
-    g:insert(statusBarBackground)
-    --
-    -- Create the other UI elements
-    -- create toolbar to go at the top of the screen
-    local titleBar = display.newImageRect(myApp.topBarBg, display.contentWidth, 50)
-    titleBar.x = display.contentCenterX
-    titleBar.y = 25 + display.topStatusBarContentHeight
-    g:insert(titleBar)
+    sharingPanel = widget.newSharingPanel({
+    	})
 
-    titleText = display.newText( "Photo Gallery", 0, 0, myApp.fontBold, 20 )
-    if myApp.isGraphics2 then
-    	titleText:setFillColor(1, 1, 1)
-    else
-        titleText:setTextColor( 255, 255, 255 )
+    local function showPanel( event )
+    	if event.phase == "ended" then
+    		sharingPanel:show()
+    	end
+    	return true
     end
-    titleText.x = display.contentCenterX
-    titleText.y = titleBar.height * 0.5 + display.topStatusBarContentHeight
-    g:insert(titleText)
 
-    backButton = widget.newButton({
-        width =  59,
-        height = 32,
-        defaultFile = "images/backbutton7_white.png",
-        overFile = "images/backbutton7_white.png",
-        onRelease = goBack
+	local leftButton = {
+		onEvent = goBack,
+		width = 59,
+		height = 32,
+		defaultFile = "images/backbutton7_white.png",
+		overFile = "images/backbutton7_white.png"
+	}
+
+	local rightButton = {
+		onEvent = showPanel,
+		width = 40,
+		height = 48,
+		defaultFile = "images/sendToButton.png",
+		overFile = "images/sendToButtonOver.png",
+	}
+
+    local navBar = widget.newNavigationBar({
+        title = "Photo Gallery",
+        backgroundColor = { 0.96, 0.62, 0.34 },
+        titleColor = {1, 1, 1},
+        font = "HelveticaNeue",
+        leftButton = leftButton,
+        rightButton = rightButton
     })
-    backButton.y = titleBar.y
-    backButton.x = 32
-    g:insert(backButton)
+    sceneGroup:insert(navBar)
 	
 	images = {}
 	for i = 1,#imageSet do
@@ -121,7 +124,7 @@ function scene:createScene( event )
 					p.yScale = h/p.height
 			end		 
 		end
-		g:insert(p)
+		sceneGroup:insert(p)
 	    
 		if (i > 1) then
 			p.x = screenW*1.5 + pad -- all images offscreen except the first one
@@ -135,14 +138,11 @@ function scene:createScene( event )
 	end
 	
 	local defaultString = "1 of " .. #images
-
-	local navBar = display.newGroup()
-	g:insert(navBar)
 	
 	imgNum = 1
 	
-	g.x = 0
-	g.y = top + display.screenOriginY
+	sceneGroup.x = 0
+	sceneGroup.y = top + display.screenOriginY
 			
 	function touchListener (self, touch) 
 		local phase = touch.phase
@@ -155,13 +155,9 @@ function scene:createScene( event )
 			startPos = touch.x
 			prevPos = touch.x
 			
-			transition.to( navBar,  { time=200, alpha=math.abs(navBar.alpha-1) } )
-									
         elseif( self.isFocus ) then
         
 			if ( phase == "moved" ) then
-			
-				transition.to(navBar,  { time=400, alpha=0 } )
 						
 				if tween then transition.cancel(tween) end
 	
@@ -210,7 +206,7 @@ function scene:createScene( event )
 	
 	function setSlideNumber()
 		print("setSlideNumber", imgNum .. " of " .. #images)
-		titleText.text = imgNum .. " of " .. #images
+		navBar:setLabel( imgNum .. " of " .. #images )
 		--imageNumberTextShadow.text = imgNum .. " of " .. #images
 	end
 	
@@ -278,13 +274,13 @@ function scene:createScene( event )
 
 end
 
-function scene:enterScene( event )
-    local group = self.view
+function scene:show( event )
+    local sceneGroup = self.view
     
 end
 
-function scene:exitScene( event )
-    local group = self.view
+function scene:hide( event )
+    local sceneGroup = self.view
 
     --
     -- Clean up any native objects and Runtime listeners, timers, etc.
@@ -292,8 +288,8 @@ function scene:exitScene( event )
     
 end
 
-function scene:destoryScene( event )
-    local group = self.view
+function scene:destroy( event )
+    local sceneGroup = self.view
     
 end
 
@@ -302,10 +298,10 @@ end
 -- END OF YOUR IMPLEMENTATION
 ---------------------------------------------------------------------------------
 
-scene:addEventListener( "createScene", scene )
-scene:addEventListener( "enterScene", scene )
-scene:addEventListener( "exitScene", scene )
-scene:addEventListener( "destroyScene", scene )
+scene:addEventListener( "create", scene )
+scene:addEventListener( "show", scene )
+scene:addEventListener( "hide", scene )
+scene:addEventListener( "destroy", scene )
 
 ---------------------------------------------------------------------------------
 

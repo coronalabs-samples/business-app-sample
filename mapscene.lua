@@ -34,9 +34,10 @@ DEALINGS IN THE SOFTWARE.
 ]]--
 ---------------------------------------------------------------------------------------
 
-local storyboard = require( "storyboard" )
-local scene = storyboard.newScene()
+local composer = require( "composer" )
+local scene = composer.newScene()
 local widget = require( "widget" )
+local widgetExtras = require( "widget-extras" )
 local myApp = require( "myapp" )
 
 widget.setTheme(myApp.theme)
@@ -44,8 +45,9 @@ widget.setTheme(myApp.theme)
 local titleText
 local myMap
 local locationtxt
-local mapWidth = display.contentWidth - 32
-local mapHeight = mapWidth -- * 1.33
+local mapWidth
+local mapHeight
+local navBar
 local views = {}
 
 local starbucksLocations = {}
@@ -101,56 +103,66 @@ local function mapLocationHandler(event)
 	end
 end
 
-local function setMode(event)
+local function setMode( event )
 	if event.phase == "ended" then
 		for i = 1, #views do
-			views[i]:setFillColor(255/myApp.colorDivisor,255/myApp.colorDivisor,192/myApp.colorDivisor)
-			views[i].label:setTextColor(96/myApp.colorDivisor, 96/myApp.colorDivisor, 96/myApp.colorDivisor)
+			views[i]:setFillColor(1, 1, 0.75)
+			views[i].label:setFillColor( 0.375, 0.375, 0.375 )
 		end
-		views[event.target.index]:setFillColor(255/myApp.colorDivisor,255/myApp.colorDivisor,224/myApp.colorDivisor)
-		views[event.target.index].label:setTextColor(64/myApp.colorDivisor, 64/myApp.colorDivisor, 64/myApp.colorDivisor)
+		views[event.target.index]:setFillColor( 1, 1, 0.875 )
+		views[event.target.index].label:setFillColor( 0.25, 0.25, 0.25 )
 		myMap.mapType = event.target.mode
 	end
 	return true
 end
 
-function scene:createScene(event)
-	local group = self.view
+local function textFieldHandler( event )
+    --
+    -- event.text only exists during the editing phase to show what's being edited.  
+    -- It is **NOT** the field's .text attribute.  That is event.target.text
+    --
+    if event.phase == "began" then
+
+        -- user begins editing textField
+        print( "Begin editing", event.target.text )
+
+    elseif event.phase == "ended" or event.phase == "submitted" then
+
+        -- do something with defaulField's text
+        print( "Final Text: ", event.target.text)
+        navBar:setLabel( event.target.text )
+        myMap:requestLocation( event.target.text, mapLocationHandler )
+        native.setKeyboardFocus( nil )
+
+    elseif event.phase == "editing" then
+
+        print( event.newCharacters )
+        print( event.oldText )
+        print( event.startPosition )
+        print( event.text )
+
+    end
+end
+
+function scene:create( event )
+	local sceneGroup = self.view
 
 	local params = event.params
 
     local background = display.newRect(0,0,display.contentWidth, display.contentHeight)
-    background:setFillColor(242/myApp.colorDivisor, 242/myApp.colorDivisor, 242/myApp.colorDivisor, 255/myApp.colorDivisor)
+    background:setFillColor( 0.95, 0.95, 0.95 )
     background.x = display.contentWidth / 2
     background.y = display.contentHeight / 2
 
-    group:insert(background)
+    sceneGroup:insert(background)
 
-    local statusBarBackground = display.newImageRect(myApp.topBarBg, display.contentWidth, display.topStatusBarContentHeight)
-    statusBarBackground.x = display.contentCenterX
-    statusBarBackground.y = display.topStatusBarContentHeight * 0.5
-    group:insert(statusBarBackground)
-    --
-    -- Create the other UI elements
-    -- create toolbar to go at the top of the screen
-    local titleBar = display.newImageRect(myApp.topBarBg, display.contentWidth, 50)
-    titleBar.x = display.contentCenterX
-    titleBar.y = 25 + display.topStatusBarContentHeight
-    group:insert(titleBar)
-    --
-    -- set up the text for the title bar, will be changed based on what page
-    -- the viewer is on
-
-    -- create embossed text to go above toolbar
-    titleText = display.newText( params.pageTitle, 0, 0, myApp.fontBold, 20 )
-    if myApp.isGraphics2 then
-	    titleText:setFillColor( 1, 1, 1 )
-    else
-	    titleText:setTextColor( 255, 255, 255 )
-	end
-    titleText.x = display.contentCenterX
-    titleText.y = titleBar.height * 0.5 + display.topStatusBarContentHeight
-    group:insert(titleText)
+    navBar = widget.newNavigationBar({
+        title = params.pageTitle,
+        backgroundColor = { 0.96, 0.62, 0.34 },
+        titleColor = {1, 1, 1},
+        font = "HelveticaNeue"
+    })
+    sceneGroup:insert(navBar)
 
     --
     -- This serves two purposes.  First, its place holder so we can see where the mapView will be while
@@ -158,134 +170,155 @@ function scene:createScene(event)
     -- map's tabs before the map is created.
     --
 
-	local mapbox = display.newRect(16, 16, mapWidth, mapHeight)
+    mapWidth = display.contentWidth
+    -- height of tabBar - height of the navBar - 20px for the buttons.
+    mapHeight = display.contentHeight - 50 - navBar.height - 30 - 30 --(address field height defined later)
+
+	local mapbox = display.newRect(0, 0, mapWidth, mapHeight)
 	mapbox.x = display.contentCenterX
-	mapbox.y = display.contentCenterY
-	mapbox:setFillColor(128/myApp.colorDivisor, 128/myApp.colorDivisor, 128/myApp.colorDivisor)
-	group:insert(mapbox)
+	mapbox.y = mapHeight / 2 + navBar.height + 30 -- (address field height)
+	mapbox:setFillColor( 0.5, 0.5, 0.5 )
+	sceneGroup:insert(mapbox)
 
 
 	local tabWidth = mapWidth / 3
 
-	views[1] = display.newRect(0,0,tabWidth,20)
+	views[1] = display.newRect(0,0,tabWidth,30)
 	views[1].x = display.contentCenterX - tabWidth
 	views[1].y = mapbox.y + (mapbox.height / 2) + 12
-	views[1]:setFillColor(255/myApp.colorDivisor,255/myApp.colorDivisor,224/myApp.colorDivisor)
-	views[1]:setStrokeColor(224/myApp.colorDivisor,224/myApp.colorDivisor,192/myApp.colorDivisor)
+	views[1]:setFillColor( 1, 1, 0.875)
+	views[1]:setStrokeColor( 0.875, 0.875, 0.75)
 	views[1].strokeWidth = 1
 	views[1].label = display.newText("Standard",0,0,myApp.font, 12 )
 	views[1].label.x = views[1].x
 	views[1].label.y = views[1].y - 3
-	if myApp.isGraphics2 then
-		views[1].label:setFillColor(64/myApp.colorDivisor, 64/myApp.colorDivisor, 64/myApp.colorDivisor)
-	else
-		views[1].label:setTextColor(64/myApp.colorDivisor, 64/myApp.colorDivisor, 64/myApp.colorDivisor)
-	end
+	views[1].label:setFillColor( 0.25, 0.25, 0.25 )
 	views[1].index = 1
 	views[1].mode = "standard"
-	group:insert(views[1])
-	group:insert(views[1].label)
+	sceneGroup:insert(views[1])
+	sceneGroup:insert(views[1].label)
 	
-	views[2] = display.newRect(0,0,tabWidth,20)
+	views[2] = display.newRect(0,0,tabWidth,30)
 	views[2].x = display.contentCenterX 
 	views[2].y = mapbox.y + (mapbox.height / 2) + 12
-	views[2]:setFillColor(255/myApp.colorDivisor,255/myApp.colorDivisor,192/myApp.colorDivisor)
-	views[2]:setStrokeColor(224/myApp.colorDivisor,224/myApp.colorDivisor,192/myApp.colorDivisor)
+	views[2]:setFillColor( 1, 1, 0.75 )
+	views[2]:setStrokeColor(0.875, 0.875, 0.75 )
 	views[2].strokeWidth = 1
 	views[2].label = display.newText("Satellite",0,0,myApp.font, 12 )
 	views[2].label.x = views[2].x
 	views[2].label.y = views[2].y - 3
-	if myApp.isGraphics2 then
-		views[2].label:setFillColor(96/myApp.colorDivisor, 96/myApp.colorDivisor, 96/myApp.colorDivisor)
-	else
-		views[2].label:setTextColor(96/myApp.colorDivisor, 96/myApp.colorDivisor, 96/myApp.colorDivisor)
-	end
+	views[2].label:setFillColor( 0.375, 0.375, 0.375 )
 	views[2].index = 2
 	views[2].mode = "satellite"
-	group:insert(views[2])
-	group:insert(views[2].label)
+	sceneGroup:insert(views[2])
+	sceneGroup:insert(views[2].label)
 
-	views[3] = display.newRect(0,0,tabWidth,20)
+	views[3] = display.newRect(0,0,tabWidth,30)
 	views[3].x = display.contentCenterX + tabWidth
 	views[3].y = mapbox.y + (mapbox.height / 2) + 12
-	views[3]:setFillColor(255/myApp.colorDivisor,255/myApp.colorDivisor,192/myApp.colorDivisor)
-	views[3]:setStrokeColor(224/myApp.colorDivisor,224/myApp.colorDivisor,192/myApp.colorDivisor)
+	views[3]:setFillColor( 1, 1, 0.75)
+	views[3]:setStrokeColor( 0.875, 0.875, 0.75 )
 	views[3].strokeWidth = 1
 	views[3].label = display.newText("Hybrid",0,0,myApp.font, 12 )
 	views[3].label.x = views[3].x
 	views[3].label.y = views[3].y - 3
-	if myApp.isGraphics2 then
-		views[3].label:setFillColor(96/myApp.colorDivisor, 96/myApp.colorDivisor, 96/myApp.colorDivisor)
-	else
-		views[3].label:setTextColor(96/myApp.colorDivisor, 96/myApp.colorDivisor, 96/myApp.colorDivisor)
-	end
+	views[3].label:setFillColor( 0.375, 0.375, 0.375)
 	views[3].index = 3
 	views[3].mode = "hybrid"
-	group:insert(views[3])
-	group:insert(views[3].label)
-
+	sceneGroup:insert(views[3])
+	sceneGroup:insert(views[3].label)
 
 end
 
-function scene:enterScene( event )
-	local group = self.view
+function scene:show( event )
+	local sceneGroup = self.view
 
-	--
-	-- Because mapViews's are native objects, the cannot intermix with the OpenGL objects that storyboard is 
-	-- managing.  It's best to create it here and destory it in exitScene.  
+	if event.phase == "did" then
+		-- The text field's native peice starts hidden, we show it after we are on screen.on
 
-	myMap = native.newMapView( 0, 0, mapWidth , mapHeight ) -- make it square
-	myMap.mapType = "standard" -- other mapType options are "satellite" or "hybrid"
+	    addressField = widget.newTextField({
+	        width = display.contentWidth,
+	        height = 30,
+	        cornerRadius = 6,
+	        strokeWidth = 0,
+	        text = "",
+	        fontSize = 14,
+	        placeholder = "Address",
+	        font = "HelveticaNeue-Light",
+	        labelFont = "HelveticaNeue",
+	        labelFontSize = 14,
+	        labelWidth = 60,
+	        listener = textFieldHandler,
+	        label = "Address"
+	    })
+	    -- Hide the native part of this until we need to show it on the screen.
 
-	-- The MapView is just another Corona display object, and can be moved or rotated, etc.
-	myMap.x = display.contentCenterX
-	myMap.y = display.contentCenterY 
+	    addressField.x = display.contentCenterX
+	    addressField.y = navBar.height + 15
+	    sceneGroup:insert(addressField)
 
-	--
-	-- Let's add some additional points of interest around our location
-	--
-	-- The event structure returned by requestLocation doesn't contain a reference to the data that
-	-- can be used to look up information to populate the marker's bubble or pass on to a more complex information
-	-- system (phone number, URL, etc.)
-	--
-	-- Let's use a Lua Closure (anonymous function) that will take the event table returned by the call and then
-	-- call our real function using the index of the table as an ID for the marker
-	--
+		--
+		-- Because mapViews's are native objects, the cannot intermix with the OpenGL objects that composer is 
+		-- managing.  It's best to create it here and destory it in exitScene.  
 
-	for i = 1, #starbucksLocations do
-		myMap:requestLocation(starbucksLocations[i], function(event) addStarbucks(event, i); end)
+		myMap = native.newMapView( 0, 0, mapWidth , mapHeight ) 
+		myMap.mapType = "standard" -- other mapType options are "satellite" or "hybrid"
+
+		-- The MapView is just another Corona display object, and can be moved or rotated, etc.
+		myMap.x = display.contentCenterX
+		myMap.y = mapHeight / 2 + navBar.height + 30
+
+		--
+		-- Let's add some additional points of interest around our location
+		--
+		-- The event structure returned by requestLocation doesn't contain a reference to the data that
+		-- can be used to look up information to populate the marker's bubble or pass on to a more complex information
+		-- system (phone number, URL, etc.)
+		--
+		-- Let's use a Lua Closure (anonymous function) that will take the event table returned by the call and then
+		-- call our real function using the index of the table as an ID for the marker
+		--
+
+		for i = 1, #starbucksLocations do
+			myMap:requestLocation(starbucksLocations[i], function(event) addStarbucks(event, i); end)
+		end
+
+		myMap:requestLocation( "1900 Embarcadero Road, Palo Alto, CA", mapLocationHandler )
+
+
+		views[1]:addEventListener("touch", setMode)
+		views[2]:addEventListener("touch", setMode)
+		views[3]:addEventListener("touch", setMode)
 	end
-
-	myMap:requestLocation( "1900 Embarcadero Road, Palo Alto, CA", mapLocationHandler )
-
-
-	views[1]:addEventListener("touch", setMode)
-	views[2]:addEventListener("touch", setMode)
-	views[3]:addEventListener("touch", setMode)
-
 end
 
-function scene:exitScene( event )
-	local group = self.view
+function scene:hide( event )
+	local sceneGroup = self.view
 
 	--
 	-- Clean up native objects
 	--
 
-	if myMap and myMap.removeSelf then
-		myMap:removeSelf()
-		myMap = nil
+	if event.phase == "will" then
+		-- remove the addressField since it contains a native object.
+		addressField:removeSelf()
+		addressField = nil
+	    -- remove the map since it's a native object.
+		if myMap and myMap.removeSelf then
+			myMap:removeSelf()
+			myMap = nil
+		end
 	end
+end
+
+function scene:destroy( event )
+	local sceneGroup = self.view
 
 end
 
-function scene:destroyScene( event )
-	local group = self.view
-end
-
-scene:addEventListener( "createScene", scene )
-scene:addEventListener( "enterScene", scene )
-scene:addEventListener( "exitScene", scene )
-scene:addEventListener( "destroyScene", scene )
+scene:addEventListener( "create", scene )
+scene:addEventListener( "show", scene )
+scene:addEventListener( "hide", scene )
+scene:addEventListener( "destroy", scene )
 
 return scene

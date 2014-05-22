@@ -35,8 +35,8 @@ DEALINGS IN THE SOFTWARE.
 ---------------------------------------------------------------------------------------
 --
 
-local storyboard = require( "storyboard" )
-local scene = storyboard.newScene()
+local composer = require( "composer" )
+local scene = composer.newScene()
 
 local socket = require( "socket" )
 local widget = require( "widget" )
@@ -48,6 +48,7 @@ local myApp = require( "myapp" )
 
 widget.setTheme(myApp.theme)
 
+
 -- forward declarations
 
 local feedName
@@ -56,13 +57,15 @@ local displayMode
 local pageTitle 
 local icons
 local params
+local springStart
+local needToReload
+local spinner
 
 local myList = nil
 local stories = {}
 local listGroup
 local imageList = {}
 
---
 -- make a quick network connection to your server.. 
 -- this requires the site's DNS Name, not a URL, in other words leave off
 -- the http:// and no trailing things like /index.php
@@ -81,19 +84,19 @@ end
 --
 local onRowTouch = function( event )
     if event.phase == "release" then
-
-        id = event.row.index
-        print(id)
-        local story = {}
-        story = stories[id]
-        params.story = story
+        
+        local id = event.row.index
+        local story = event.target.params.story
+        local params = {
+            story = story
+        }
         local options = {
             effect = "slideLeft",
-            time = 500,
+            time = 250,
             isModal = true,
             params = params
         }
-        storyboard.showOverlay(displayMode, options)
+        composer.showOverlay(displayMode, options)
     end
     return true
 end
@@ -108,23 +111,18 @@ local function onRowRender(event)
     -- set up the variables we need that are passed via the event table
     --
     local row = event.row
+    local story = event.row.params.story
     local id = row.index
     --
     -- boundry check to make sure we are tnot trying to access a story that
     -- doesnt exist.
     --
     if id > #stories then return true end
-    --print("RowRender:", id)
-    --print("RowRender:", stories[id].title)
 
-    -- setup the the row background,  I've chosen to alternate rows with
-    -- a pale blue and pale green color
     row.bg = display.newRect(0, 0, display.contentWidth, 60)
-    if myApp.isGraphics2 then
-        row.bg.anchorX = 0
-        row.bg.anchorY = 0
-    end
-    row.bg:setFillColor(255/myApp.colorDivisor,255/myApp.colorDivisor,255/myApp.colorDivisor)
+    row.bg.anchorX = 0
+    row.bg.anchorY = 0
+    row.bg:setFillColor( 1, 1, 1 )
 
     row:insert(row.bg)
     
@@ -157,12 +155,8 @@ local function onRowRender(event)
             local h = event.target.height
             local s = itemIcon.height / h
             event.target:scale(s,s)
-            if myApp.isGraphics2 then
-                event.target.anchorX = 0
-                event.target.anchorY = 0
-            else
-                event.target:setReferencePoint(display.TopLeftReferencePoint)
-            end
+            event.target.anchorX = 0
+            event.target.anchorY = 0
             event.target.x = 2
             event.target.y = 4
             --
@@ -180,7 +174,7 @@ local function onRowRender(event)
         --
         -- lets check to see if we have any enclosures.  The entry must not be nil and there has to be at least one entry
         -- (it is possible for enclosures to have an empty table that wouldn't be nil)
-        if stories[id].enclosures and #stories[id].enclosures > 0 then
+        if story.enclosures and #story.enclosures > 0 then
             -- check to see if it's an image.
             -- an entry can have multiple enclosures.  They may not all be something we can display (audio, etc.) so loop 
             -- over the enclosures and look for anything that is a type we can suppport.   This is case sensitive and I don't
@@ -188,9 +182,9 @@ local function onRowRender(event)
             --
             local found = false
             local j = 0
-            while j < #stories[id].enclosures and not found do
+            while j < #story.enclosures and not found do
                 j = j + 1
-                local e = stories[id].enclosures[j]
+                local e = story.enclosures[j]
                 if e.type == "image/jpeg" or e.type == "image/jpg" or e.type == "image/png" then
                     --
                     -- Ah Ha! we have a potentially displayable image
@@ -223,24 +217,15 @@ local function onRowRender(event)
     -- Now create the first line of text in the table view with the headline
     -- of the story item.
     --
-
-    local title = stories[id].title
-    if string.sub(title,1,17) == "Corona University" then
-        title = "CU" .. string.sub(title,18)
-    end
-
-    local myTitle = title
+    local myTitle = story.title
     if string.len(myTitle) > 26 then
-        myTitle = string.sub(stories[id].title, 1, 26) .. "..."
+        myTitle = string.sub(story.title, 1, 26) .. "..."
     end
     row.title = display.newText( myTitle, 12, 0, myApp.fontBold, 18 )
-    if myApp.isGraphics2 then
-        row.title.anchorX = 0
-        row.title:setFillColor( 0 )
-    else
-        row.title:setReferencePoint( display.CenterLeftReferencePoint )
-        row.title:setTextColor( 0 )
-    end
+    row.title.anchorX = 0
+    row.title.anchorY = 0.5
+    row.title:setFillColor( 0 )
+
     row.title.y = 22
     row.title.x = 42
 
@@ -248,18 +233,13 @@ local function onRowRender(event)
     --
     -- show the publish time in grey below the headline
     --
-    local timeStamp = string.match(stories[id].pubDate,"%w+, %d+ %w+ %w+ %w+:%w+")
+    local timeStamp = string.match(story.pubDate,"%w+, %d+ %w+ %w+ %w+:%w+")
     row.subtitle = display.newText( timeStamp, 12, 0, myApp.font, 14)
-    if myApp.isGraphics2 then 
-        row.subtitle.anchorX = 0
-        row.subtitle:setFillColor(96/255, 96/255, 96/255, 1)
-    else
-        row.subtitle:setReferencePoint(display.CenterLeftReferencePoint )
-        row.subtitle:setTextColor(96, 96, 96, 255)
-    end
+    row.subtitle.anchorX = 0
+    row.subtitle:setFillColor( 0.375, 0.375, 0.375 )
     row.subtitle.y = row.height - 18
     row.subtitle.x = 42
- 
+
     --
     -- Add a graphical right arrow to the right side to indicate the reader
     -- should touch the row for more information
@@ -290,12 +270,15 @@ local function showTableView()
     for i = 1, #stories do
 
         print("insert row:  " .. i .. " [" .. stories[i].title .. "]")
-
+        
         myList:insertRow{
             rowHeight = 60,
             isCategory = false,
-            rowColor = {255/myApp.colorDivisor, 255/myApp.colorDivisor, 255/myApp.colorDivisor, 255/myApp.colorDivisor},
-            lineColor = { 232/myApp.colorDivisor, 232/myApp.colorDivisor, 232/myApp.colorDivisor, 255/myApp.colorDivisor  },
+            rowColor = { 1, 1, 1 },
+            lineColor = { 0.90, 0.90, 0.90 },
+            params = {
+                story = stories[i]
+            }
         }
     end
     -- cancel the busy indicator
@@ -326,7 +309,7 @@ end
 -- Both are RSS feeds, but they are slightly different and enough that the same
 -- parser won't deal with both feeds.  So you can substitude 
 function displayFeed(feedName, feedURL)
-
+    native.setActivityIndicator(true)
     print("entering displayFeed", feedName, feedURL)
 
     -- 
@@ -344,6 +327,7 @@ function displayFeed(feedName, feedURL)
         stories = feed.items
         print("Num stories: " .. #stories)
         print("Got ", #stories, " stories, now show the tableView")
+        purgeList(myList)
         showTableView()
     end
     
@@ -355,9 +339,9 @@ function displayFeed(feedName, feedURL)
     -- Ah ha, our download is finished.  Maybe.  If it is, process the feed.
     
     local networkListener = function( event )
-        
+       
         if ( event.isError ) then
-            local alert = native.showAlert( "tACKY", "Feed temporarily unavaialble.", 
+            local alert = native.showAlert( "CoronaSDK", "Feed temporarily unavaialble.", 
                                         { "OK" }, onAlertComplete )
         else
             print("calling processRSSFeed because the feed is avaialble")
@@ -395,7 +379,7 @@ function displayFeed(feedName, feedURL)
             print("calling processRSSfeed because the network isn't reachable")
             processRSSFeed(feedName, system.CachesDirectory)
         else
-            local alert = native.showAlert( "tACKY", "Feed temporarily unavaialble.", 
+            local alert = native.showAlert( "CoronaSDK", "Feed temporarily unavaialble.", 
                                         { "OK" }, onAlertComplete )
         end
     end
@@ -403,60 +387,99 @@ function displayFeed(feedName, feedURL)
    
 end
 
+local function reloadTable()
+    --
+    -- check the URL and see if it has a query string, if not add one, if it does just add 
+    -- our cache buster string
+    -- 
+    local cacheBustedURL = feedURL
+    if string.find(cacheBustedURL,"%?") then
+        -- we have a query string
+        cacheBustedURL = cacheBustedURL .. "&cacheBust=" .. tonumber(os.time())
+    else
+        cacheBustedURL = cacheBustedURL .. "?cacheBust=" .. tonumber(os.time())
+    end
+    displayFeed(feedName, cacheBustedURL )
+end
+
 local function tableViewListener(event)
-    print(event.phase)
+    print("tableViewListener", event.phase, event.direction, event.limitReached, myList:getContentPosition( ))
+    if event.phase == "began" then
+        springStart = event.target.parent.parent:getContentPosition( )
+        print("springStart", springStart)
+        needToReload = false
+        spinner.isVisible = true
+        spinner:start()
+    elseif event.phase == "moved" then
+        if event.target.parent.parent:getContentPosition( ) > springStart + 60 then
+            needToReload = true
+            --print("needToReload", needToReload, myList:getContentPosition( ), springStart + 60)
+        end
+    elseif event.phase == nil and event.direction == "down" and event.limitReached == true and needToReload then
+        --print("reloading Table!")
+        needToReload = false
+        spinner:stop()
+        spinner.isVisible = false
+        reloadTable()
+    end
+    return true
 end
 
 --
--- Start the Storyboard event handlers
+-- Start the composer event handlers
 --
 
-function scene:createScene( event )
-    local group = self.view
-
-    
+function scene:create( event )
+    local sceneGroup = self.view
 
     params = event.params
         
     --
-    -- setup a page background, really not that important though storyboard
+    -- setup a page background, really not that important though composer
     -- crashes out if there isn't a display object in the view.
     --
 
     print("create scene")
     local background = display.newRect(0,0,display.contentWidth, display.contentHeight)
-    background:setFillColor(242/myApp.colorDivisor/myApp.colorDivisor, 242/myApp.colorDivisor, 242/myApp.colorDivisor, 255/myApp.colorDivisor)
+    background:setFillColor( 0.95, 0.95, 0.95 )
     background.x = display.contentWidth / 2
     background.y = display.contentHeight / 2
 
-    group:insert(background)
+    sceneGroup:insert(background)
 
-    local statusBarBackground = display.newImageRect(myApp.topBarBg, display.contentWidth, display.topStatusBarContentHeight)
-    statusBarBackground.x = display.contentCenterX
-    statusBarBackground.y = display.topStatusBarContentHeight * 0.5
-    group:insert(statusBarBackground)
-    --
-    -- Create the other UI elements
-    -- create toolbar to go at the top of the screen
-    local titleBar = display.newImageRect(myApp.topBarBg, display.contentWidth, 50)
-    titleBar.x = display.contentCenterX
-    titleBar.y = 25 + display.topStatusBarContentHeight
-    group:insert(titleBar)
+    local navBar = widget.newNavigationBar({
+        title = "Corona Video",
+        backgroundColor = { 0.96, 0.62, 0.34 },
+        titleColor = {1, 1, 1},
+        font = "HelveticaNeue"
+    })
+    sceneGroup:insert(navBar)
 
     --
-    -- set up the text for the title bar, will be changed based on what page
-    -- the viewer is on
+    -- Create an invisible button to reload our table over top of the status bar
+    --
 
-    -- create embossed text to go above toolbar
-    titleText = display.newText( params.pageTitle, 0, 0, myApp.fontBold, 20 )
-    if myApp.isGraphics2 then
-        titleText:setFillColor(1, 1, 1)
-    else
-        titleText:setTextColor( 255, 255, 255 )
-    end
-    titleText.x = display.contentCenterX
-    titleText.y = titleBar.height * 0.5 + display.topStatusBarContentHeight
-    group:insert(titleText)
+    local reloadBar = display.newRect(display.contentCenterX, display.topStatusBarContentHeight * 0.5, display.contentWidth, display.topStatusBarContentHeight)
+    reloadBar.isVisible = false
+    reloadBar.isHitTestable = true
+    reloadBar:addEventListener( "tap", reloadTable )
+
+
+    local box = display.newRect(display.contentCenterX, display.contentCenterY, display.contentWidth, display.contentHeight - navBar.height - 50)
+    box:setFillColor( 0.8, 0.8, 0.8 )
+    box.anchorY = 0
+    box.y = navBar.height
+    sceneGroup:insert(box)
+
+    spinner = widget.newSpinner({ 
+        width = 32, 
+        height = 32, 
+    })
+    sceneGroup:insert(spinner)
+    spinner.x = display.contentCenterX
+    spinner.y = navBar.height + 20
+    spinner.isVisible = false
+
     --
     -- Create the table view.  After the height of the top bar, the bottom tabBar
     -- and room for the ad, we have room for a 320x320 area to hold the table view.
@@ -477,27 +500,29 @@ function scene:createScene( event )
     end
 
     myList = widget.newTableView{ 
-        top = titleBar.height + display.topStatusBarContentHeight, 
+        top = navBar.height, 
         width = tWidth, 
         height = tHeight, 
         maskFile = maskFile,
         listener = tableViewListener,
+        hideBackground = true, 
         onRowRender = onRowRender,
         onRowTouch = onRowTouch 
     }
     --
     -- insert the list into the group
-    group:insert(myList)
+    sceneGroup:insert(myList)
 end
 
-function scene:enterScene( event )
-    local group = self.view
+function scene:show( event )
+    local sceneGroup = self.view
 
+    
     params = event.params
 
     print("enter scene")
  
-    -- fetch the parameters from the storyboard table for this view
+    -- fetch the parameters from the composer table for this view
     
     feedName = params.feedName
     feedURL = params.feedURL
@@ -508,25 +533,27 @@ function scene:enterScene( event )
     --
     -- go fetch the feed
     --
-    native.setActivityIndicator(true)
-    print("enterScene", feedName,feedURL)
-    displayFeed(feedName, feedURL)
-
+    if event.phase == "did" then
+        print("show", feedName,feedURL)
+        displayFeed(feedName, feedURL)
+    end
 end
 
-function scene:exitScene( event )
-    local group = self.view
+function scene:hide( event )
+    local sceneGroup = self.view
     
     -- get out of here.
     -- dump the table entries
     --
-    print("exit scene")
-    purgeList(myList)
-    
+    if event.phase == "will" then
+        print("exit scene")
+        purgeList(myList)
+    end
+
 end
 
-function scene:destoryScene( event )
-    local group = self.view
+function scene:destroy( event )
+    local sceneGroup = self.view
     
     print("destroy scene")
 end
@@ -537,18 +564,18 @@ end
 ---------------------------------------------------------------------------------
 
 -- "createScene" event is dispatched if scene's view does not exist
-scene:addEventListener( "createScene", scene )
+scene:addEventListener( "create", scene )
 
 -- "enterScene" event is dispatched whenever scene transition has finished
-scene:addEventListener( "enterScene", scene )
+scene:addEventListener( "show", scene )
 
 -- "exitScene" event is dispatched before next scene's transition begins
-scene:addEventListener( "exitScene", scene )
+scene:addEventListener( "hide", scene )
 
 -- "destroyScene" event is dispatched before view is unloaded, which can be
 -- automatically unloaded in low memory situations, or explicitly via a call to
--- storyboard.purgeScene() or storyboard.removeScene().
-scene:addEventListener( "destroyScene", scene )
+-- composer.purgeScene() or composer.removeScene().
+scene:addEventListener( "destroy", scene )
 
 ---------------------------------------------------------------------------------
 
