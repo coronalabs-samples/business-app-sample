@@ -1,16 +1,28 @@
---calculate the aspect ratio of the device:
-local aspectRatio = display.pixelHeight / display.pixelWidth
-
 application = {
    content = {
-      width = aspectRatio > 1.5 and 320 or math.ceil( 480 / aspectRatio ),
-      height = aspectRatio < 1.5 and 480 or math.ceil( 320 * aspectRatio ),
-      scale = "letterBox",
+      --
+      -- width and height will be calcuated at about 160 points per inch
+      --
+      -- Adaptive is based on a 320 point content area and larger screens will have more screen space
+      -- to use.
+      scale = "adaptive",
       fps = 60,
 
       imageSuffix = {
          ["@2x"] = 1.5,
-         ["@4x"] = 3.0,
+         ["@3x"] = 2.5,
+         ["@4x"] = 3.1,
       },
    },
+   notification = 
+   {
+      iphone =
+      {
+         types = { "badge", "sound", "alert" }
+      },
+      google =
+      {
+         projectNumber = "1234567890"
+      },
+   }
 }
