@@ -11,6 +11,8 @@
 
 module(..., package.seeall)
 
+local utility = require("utility")
+
 local xml = require( "xml" ).newParser()
 
 function feed(filename, base)
@@ -28,14 +30,19 @@ function feed(filename, base)
     local myFeed = xml:loadFile(rssFile, baseDir)
     local items = myFeed.child
     local i
-    --print("Number of items: " .. #items)
+    --utility.print_r(items)
+    print("Number of items: " .. #items)
     local l = 1
     for i = 1, #items do
         local item = items[i]
+        --if item.name == "entry" then
+        --    item = items[i].child
+        --end
         local enclosuers = {}
         local e = 1
         local story = {}
-        --print(item.name)
+        --utility.print_r( item )
+        --print("Item name", item.name)
         if item.name == "title" then feed.title = item.value end
         if item.name == "link"  then feed.link = item.value end
         if item.name == "description" then feed.description = item.value end
@@ -44,7 +51,8 @@ function feed(filename, base)
         if item.name == "updated" then feed.updated = item.value end
         if item.name == "rights" then feed.rights = item.value end
 
-        if item.name == "entry" then -- we have a story batman!
+        if item.name == "entry" then -- 
+            --print("we have a story batman!")
             local entry = {}
             entry = item.child
             local j
@@ -54,7 +62,10 @@ function feed(filename, base)
                     story.title = entry[j].value
                 end
                 if entry[j].name == "link" then
-                    story.link = entry[j].value
+                    story.link = entry[j].properties.href
+                end
+                if entry[j].name == "yt:videoId" then
+                    story.youTubeId = entry[j].value
                 end
                 if entry[j].name == "published" then
                     story.pubDate = entry[j].value
@@ -91,6 +102,27 @@ function feed(filename, base)
                     enclosuers[e] = properties
                     e = e + 1
                 end
+                if entry[j].name == "media:group" then
+                    local mediaEntry = entry[j].child
+                    --utility.print_r( mediaEntry )
+                    --print("#mediaEntry", #mediaEntry)
+                    for i = 1, #mediaEntry do
+                        mediaItem = mediaEntry[i]
+                        print(mediaItem.name)
+                        if mediaItem.name == "media:title" then
+                            story.title = mediaItem.value
+                        end
+                        if mediaItem.name == "media:content" then
+                            story.content = mediaItem.value
+                        end
+                        if mediaItem.name == "media:description" then
+                            story.description = mediaItem.value
+                        end
+                        if mediaItem.name == "media:thumbnail" then
+                            story.thumbnail = mediaItem.value
+                        end
+                     end
+                end
             end
             stories[l] = {}
             stories[l].link = story.link
@@ -102,6 +134,8 @@ function feed(filename, base)
             stories[l].comments = story.comments
             stories[l].content_encoded = story.content
             stories[l].enclosures = enclosuers
+            stories[l].thumbnail = story.thumbnail
+            stories[l].youTubeId = story.youTubeId
             l = l + 1
         end
     end

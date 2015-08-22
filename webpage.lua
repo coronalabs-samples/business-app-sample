@@ -178,11 +178,13 @@ function scene:show( event )
     --    local options = { hasBackground=false, baseUrl=system.TemporaryDirectory, urlRequest=listener }
         --local options = { hasBackground=true,  urlRequest=listener }
     --    native.showWebPopup(0, 51 + 60 + 20 + 60, display.contentWidth, 220 + isTall, "story.html", options )
-        
-        webView = native.newWebView(0, 71, display.contentWidth, 300 + isTall)
-        webView:request("story.html", system.TemporaryDirectory)
+
+        webView = native.newWebView(0, 71, display.contentWidth, display.contentHeight - 150)
         webView.x = display.contentCenterX
-        webView.y = 150 + isTall / 2 + 71
+        webView.y = 50
+        webView.anchorY  = 0
+
+        webView:request("story.html", system.TemporaryDirectory)
 
         webView:addEventListener( "urlRequest", webListener )
         -- add a button to see the full article in the web browser

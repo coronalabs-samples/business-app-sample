@@ -46,6 +46,7 @@ settings =
 
             -- Optional permission used to display current location via WiFi or cellular service.
             "android.permission.ACCESS_COARSE_LOCATION",
+            "com.google.android.c2dm.permission.RECEIVE",
         },
         usesFeatures =
         {

@@ -214,12 +214,18 @@ local function onRowRender(event)
 
     end
     --
+    -- Figure out how long I can make my titles
+    --
+    local titleLength = math.floor(display.contentWidth / 11) - 3
+    print("titleLength ", titleLength)
+    print("CL", display.contentWidth)
+    --
     -- Now create the first line of text in the table view with the headline
     -- of the story item.
     --
     local myTitle = story.title
-    if string.len(myTitle) > 26 then
-        myTitle = string.sub(story.title, 1, 26) .. "..."
+    if string.len(myTitle) > titleLength then
+        myTitle = string.sub(story.title, 1, titleLength) .. "..."
     end
     row.title = display.newText( myTitle, 12, 0, myApp.fontBold, 18 )
     row.title.anchorX = 0
@@ -486,18 +492,8 @@ function scene:create( event )
     -- Since we are not using the whole screen we will need a mask file.
     --
 
-    -- build a new tableView
-    local tWidth = 320
-    local tHeight = 380
-    local maskFile = "images/mask-320x380.png"
-    if myApp.is_iPad then
-        tWidth = 360
-        maskFile = "images/mask-360x380.png"
-    end
-    if myApp.isTall then
-        tHeight = 448
-        maskFile = "images/mask-320x448.png"
-    end
+    local tWidth = display.contentWidth
+    local tHeight = display.contentHeight - navBar.height - myApp.tabBar.height
 
     myList = widget.newTableView{ 
         top = navBar.height, 

@@ -99,6 +99,8 @@ function scene:create( event )
         groupOffset = 40
     end
 
+    local maxCol = math.floor( display.contentWidth / 80 ) - 1
+
     for i = 1, #photoFiles do
     	photosThumbnails[i] = display.newImage(photoFiles[i])
     	local aspectRatio = photosThumbnails[i].width / photosThumbnails[i].height
@@ -122,7 +124,7 @@ function scene:create( event )
 		photosThumbGroups[i].index = i
 		photosThumbGroups[i]:addEventListener("touch", showPhoto)
 		col = col + 1
-		if col > 3 then 
+		if col > maxCol then 
 			row = row + 1
 			col = 0
 		end

@@ -146,7 +146,7 @@ function myApp.showScreen2(event)
     myApp.tabBar:setSelected(2)
     local options = {
         feedName = "corona.rss",
-        feedURL = "http://www.coronalabs.com/feed/",
+        feedURL = "https://www.coronalabs.com/feed/",
         icons = "fixed",
         displayMode = "webpage",
         pageTitle = "Corona Labs"
@@ -167,7 +167,7 @@ function myApp.showScreen4()
     myApp.tabBar:setSelected(4)
     local options = {
         feedName = "video.rss",
-        feedURL = "http://gdata.youtube.com/feeds/mobile/users/CoronaLabs/uploads?max-results=20&alt=rss&orderby=published&format=1",
+        feedURL = "https://www.youtube.com/feeds/videos.xml?user=CoronaLabs",
         icons = "fixed",
         displayMode = "videoviewer",
         pageTitle = "Corona Videos"

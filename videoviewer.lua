@@ -40,6 +40,8 @@ local scene = composer.newScene()
 local widget = require( "widget" )
 local myApp = require( "myapp" )
 
+local utility = require( "utility" )
+
 widget.setTheme(myApp.theme)
 
 local backButton 
@@ -110,6 +112,8 @@ function scene:show( event )
 
         navBar:setLabel( title )
         
+        --utility.print_r( story )
+
         -- do nothing when the podcast finishes playing.
         local function onComplete(event)
             return true
@@ -143,15 +147,16 @@ function scene:show( event )
             print( "Created file" )
             fh:write("<!doctype html>\n<html>\n<head>\n<meta charset=\"utf-8\">")
             fh:write("<meta name=\"viewport\" content=\"width=320; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;\"/>\n")
-            fh:write("<style type=\"text/css\">\n html { -webkit-text-size-adjust: none; font-family: HelveticaNeue-Light, Helvetica, Droid-Sans, Arial, san-serif; font-size: 1.1em; } h1 {font-size:1.25em;} p {font-size:0.9em; } </style>")
+            fh:write("<style type=\"text/css\">\n html { -webkit-text-size-adjust: none; font-family: HelveticaNeue-Light, Helvetica, Droid-Sans, Arial, san-serif; font-size: 1.0em; } h1 {font-size:1.25em;} p {font-size:0.9em; } </style>")
             fh:write("</head>\n<body>\n")
             if story.title then
                 fh:write("<h1>" .. story.title .. "</h1>\n")
             end
             if story.link then 
                 local videoID = story.link:sub(32, 42)
-                print(videoID)
-                fh:write([[<iframe width="300" height="225" src="http://www.youtube.com/embed/]] .. videoID .. [[?html5=1" frameborder="0" allowfullscreen></iframe>]])
+                --print(videoID)
+                local height = math.floor(display.contentWidth / 16 * 9)
+                fh:write([[<iframe width="100%" height="]] .. height .. [[" src="http://www.youtube.com/embed/]] .. videoID .. [[?html5=1" frameborder="0" allowfullscreen></iframe>]])
             end
             if story.content_encoded then
                 fh:write( story.content_encoded)
@@ -196,9 +201,10 @@ function scene:show( event )
         --local options = { hasBackground=true,  urlRequest=listener }
     --    native.showWebPopup(0, 51 + 60 + 20 + 60, display.contentWidth, 220 + isTall, "story.html", options )
         
-        webView = native.newWebView(0, 71, display.contentWidth, 300 + isTall)
+        webView = native.newWebView(0, 71, display.contentWidth, display.contentHeight - 150)
         webView.x = display.contentCenterX
-        webView.y = 150 + isTall / 2 + 71
+        webView.y = 50
+        webView.anchorY  = 0
         webView:request("story.html", system.TemporaryDirectory)
         webView:addEventListener( "urlRequest", webListener )
         -- add a button to see the full article in the web browser
