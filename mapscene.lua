@@ -262,33 +262,35 @@ function scene:show( event )
 		-- managing.  It's best to create it here and destory it in exitScene.  
 
 		myMap = native.newMapView( 0, 0, mapWidth , mapHeight ) 
-		myMap.mapType = "standard" -- other mapType options are "satellite" or "hybrid"
+		if myMap then
+			myMap.mapType = "standard" -- other mapType options are "satellite" or "hybrid"
 
-		-- The MapView is just another Corona display object, and can be moved or rotated, etc.
-		myMap.x = display.contentCenterX
-		myMap.y = mapHeight / 2 + navBar.height + 30
+			-- The MapView is just another Corona display object, and can be moved or rotated, etc.
+			myMap.x = display.contentCenterX
+			myMap.y = mapHeight / 2 + navBar.height + 30
 
-		--
-		-- Let's add some additional points of interest around our location
-		--
-		-- The event structure returned by requestLocation doesn't contain a reference to the data that
-		-- can be used to look up information to populate the marker's bubble or pass on to a more complex information
-		-- system (phone number, URL, etc.)
-		--
-		-- Let's use a Lua Closure (anonymous function) that will take the event table returned by the call and then
-		-- call our real function using the index of the table as an ID for the marker
-		--
+			--
+			-- Let's add some additional points of interest around our location
+			--
+			-- The event structure returned by requestLocation doesn't contain a reference to the data that
+			-- can be used to look up information to populate the marker's bubble or pass on to a more complex information
+			-- system (phone number, URL, etc.)
+			--
+			-- Let's use a Lua Closure (anonymous function) that will take the event table returned by the call and then
+			-- call our real function using the index of the table as an ID for the marker
+			--
 
-		for i = 1, #starbucksLocations do
-			myMap:requestLocation(starbucksLocations[i], function(event) addStarbucks(event, i); end)
+			for i = 1, #starbucksLocations do
+				myMap:requestLocation(starbucksLocations[i], function(event) addStarbucks(event, i); end)
+			end
+
+			myMap:requestLocation( "1900 Embarcadero Road, Palo Alto, CA", mapLocationHandler )
+			views[1]:addEventListener("touch", setMode)
+			views[2]:addEventListener("touch", setMode)
+			views[3]:addEventListener("touch", setMode)
+		else
+			native.showAlert( "Simulator", "Maps are only avaiable on device.", { "Okay" } )
 		end
-
-		myMap:requestLocation( "1900 Embarcadero Road, Palo Alto, CA", mapLocationHandler )
-
-
-		views[1]:addEventListener("touch", setMode)
-		views[2]:addEventListener("touch", setMode)
-		views[3]:addEventListener("touch", setMode)
 	end
 end
 

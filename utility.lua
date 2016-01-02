@@ -43,7 +43,7 @@ end
 
 function M.testNetworkConnection()
     print("testing connection") 
-    if http.request( "http://redlertech.com/jackask/index.php" ) == nil then
+    if http.request( "http://google.com/" ) == nil then
         print("cant connect to google")
         return false
     end
