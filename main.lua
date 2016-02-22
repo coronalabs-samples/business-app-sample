@@ -72,6 +72,29 @@ end
 math.randomseed(os.time())
 
 --
+-- Initialize database
+-- 
+local db = require( "database" )
+local myScheme = {}
+myScheme["__tableName"] = "accounts"
+myScheme["firstName"] = "text"
+myScheme["lastName"] = "text"
+myScheme["email"] = "text"
+
+
+--
+-- Create the database
+-- store the object handle in our faux global myApp table
+--
+db.init( "mydatabase.db", myScheme )
+
+
+-- NOTE: In a real app you should do a one way encryption on the password field and never store it in clear text.
+-- It's always best to encrypt it, and compare it to the encryptied value in the database. 
+-- MD5 hash's are easy encrytption for passwwords, bt most hackers have already gotten MD5 password hashes for most
+-- common passwords anyway.
+
+--
 -- Load our fonts and define our styles
 --
 
@@ -188,6 +211,16 @@ function myApp.showScreen5()
     return true
 end
 
+function myApp.showScreen6()
+    myApp.tabBar:setSelected(6)
+    local options = {
+
+        pageTitle = "Data Table"
+    }
+    composer.removeHidden()
+    composer.gotoScene("datatable", {time=250, effect="crossFade", params = options})
+    return true
+end
 --
 -- build the top bar which is a tab bar without buttons
 --
@@ -259,6 +292,18 @@ local tabButtons = {
         width = 32,
         height = 32,
         onPress = myApp.showScreen5,
+    },
+    {
+        label = "Data",
+        defaultFile = "images/tabbaricon.png",
+        overFile = "images/tabbaricon-down.png",
+        labelColor = { 
+            default = { 0.25, 0.25, 0.25 }, 
+            over = { 0.768, 0.516, 0.25 }
+        },
+        width = 32,
+        height = 32,
+        onPress = myApp.showScreen6,
     },
 }
 

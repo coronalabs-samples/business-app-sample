@@ -106,7 +106,7 @@ function scene:create( event )
     })
     sceneGroup:insert(button2)
     button2.x = display.contentCenterX
-    button2.y = display.contentCenterY - 40
+    button2.y = display.contentCenterY - 50
 
 
     local button3 = widget.newButton({
@@ -125,7 +125,7 @@ function scene:create( event )
     })
     sceneGroup:insert(button3)
     button3.x = display.contentCenterX
-    button3.y = display.contentCenterY + 40
+    button3.y = display.contentCenterY + 20
 
     local button4 = widget.newButton({
     	width = 160,
@@ -143,7 +143,26 @@ function scene:create( event )
     })
     sceneGroup:insert(button4)
     button4.x = display.contentCenterX
-    button4.y = display.contentCenterY + 120
+    button4.y = display.contentCenterY + 90
+
+    local button5 = widget.newButton( {
+        width = 160,
+        height = 40,
+        label = "Data",
+        labelColor = { 
+            default = { 0.90, 0.60, 0.34 }, 
+            over = { 0.79, 0.48, 0.30 } 
+        },
+        labelYOffset = -4, 
+        font = myApp.font,
+        fontSize = 18,
+        emboss = false,
+        onRelease = myApp.showScreen6
+    } )
+    sceneGroup:insert(button5)
+    button5.x = display.contentCenterX
+    button5.y = display.contentCenterY + 160
+
 end
 
 function scene:show( event )

@@ -1,5 +1,6 @@
-local widget = require("widget")
-local myApp = require("myapp")
+local widget = require( "widget" )
+local json = require( "json" )
+local myApp = require( "myapp" )
 
 function widget.newSharingPanel( services )
     local function onRowTouch( event )
@@ -323,7 +324,7 @@ function widget.newTextField(options)
     }
     local fieldLabel = display.newText(labelParameters)
     fieldLabel:setFillColor(unpack(opt.labelFontColor))
-    fieldLabel.x = background.x - bgWidth / 2 + opt.cornerRadius + opt.labelWidth * 0.5
+    fieldLabel.x = background.x - bgWidth / 2 + opt.cornerRadius + opt.labelWidth * 0.5 + 5
     fieldLabel.y = background.y
     if not widget.isSeven() then
         fieldLabel.y = background.y + opt.height + 5
@@ -361,39 +362,49 @@ function widget.newTextField(options)
     field.textField.placeholder = opt.placeholder
 
     -- Function to listen for textbox events
-    function field.textField:_inputListener( event )
+    --function field.textField:_inputListener( event )
+    function field.textField._inputListener( event )
         local phase = event.phase
         
         if "began" == phase then
             -- make sure we are in a display group
             -- the trick is our master object is a group, so we need to make sure our 
             -- grandparent isn't the stage
-            if display.getCurrentStage() ~= self.parent.parent then
+            if display.getCurrentStage() ~= event.target.parent.parent then
                 -- make a guess at the keyboard height.  
                 local kbHeight = 0.5 * display.contentHeight
                 local fieldLoc = 0.25 * display.contentHeight
                 -- scroll into view
-                if self.y > kbHeight then
-                    self.yOrig = self.y
-                    transition.to(self.parent.parent, {time=500, y = fieldLoc})
+                if event.target.y > kbHeight then
+                    event.target.yOrig = self.y
+                    transition.to(event.target.parent.parent, {time=500, y = fieldLoc})
                 end
             end 
         elseif "submitted" == phase or "ended" == phase then
             -- Hide keyboard
-            if self.yOrig ~= self.y then -- we have been scrolled
-                transition.to(self.parent.parent, {time=500, y = self.yOrig})
+            if event.target.yOrig ~= event.target.y then -- we have been scrolled
+                transition.to(event.target.parent.parent, {time=500, y = event.target.yOrig})
             end
         end
         
         -- If there is a listener defined, execute it
-        if self._listener then
-            self._listener( event )
+        local e = {}
+        e.newCharacters = event.newCharacters
+        e.numDeleted = event.numDeleted
+        e.oldText = event.oldText
+        e.phase = event.phase
+        e.startPosition = event.startPosition
+        e.target = event.target
+        e.text = event.text
+        print( json.prettify(e))
+        if event.target._listener then
+            event.target._listener( e )
         end
     end
     
-    field.textField.userInput = field.textField._inputListener
-    field.textField:addEventListener( "userInput" )
-
+    --field.textField.userInput = field.textField._inputListener
+    field.textField:addEventListener( "userInput", field.textField._inputListener )
+    field.textField.id = opt.id
     print(opt.font, opt.fontSize, deviceScale)
 
     field.textField.font = native.newFont( opt.font, opt.fontSize * deviceScale )
@@ -527,7 +538,7 @@ function widget.newNavigationBar( options )
                 id = opt.rightButton.id,
                 label = opt.rightButton.label or "Default",
                 onEvent = opt.rightButton.onEvent,
-                font = opt.leftButton.font or opt.font,
+                font = opt.rightButton.font or opt.font,
                 fontSize = opt.fontSize,
                 labelColor = opt.rightButton.labelColor or { default={ 1, 1, 1 }, over={ 0, 0, 0, 0.5 } },
                 labelAlign = "right",

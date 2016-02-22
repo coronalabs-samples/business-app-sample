@@ -114,7 +114,7 @@ local function onRowRender(event)
     local story = event.row.params.story
     local id = row.index
     --
-    -- boundry check to make sure we are tnot trying to access a story that
+    -- boundry check to make sure we are not trying to access a story that
     -- doesnt exist.
     --
     if id > #stories then return true end
@@ -411,13 +411,21 @@ end
 local function tableViewListener(event)
     print("tableViewListener", event.phase, event.direction, event.limitReached, myList:getContentPosition( ))
     if event.phase == "began" then
-        springStart = event.target.parent.parent:getContentPosition( )
+        local currentPosition = nil
+        if event.target.parent.parent.getContentPosition then 
+            currentPosition = event.target.parent.parent:getContentPosition( )
+        end
+        springStart = currentPosition
         print("springStart", springStart)
         needToReload = false
         spinner.isVisible = true
         spinner:start()
     elseif event.phase == "moved" then
-        if event.target.parent.parent:getContentPosition( ) > springStart + 60 then
+        local currentPosition = nil
+        if event.target.parent.parent.getContentPosition then
+            currentPosition = event.target.parent.parent:getContentPosition( )
+        end
+        if currentPosition and springStart and currentPosition > springStart + 60 then
             needToReload = true
             --print("needToReload", needToReload, myList:getContentPosition( ), springStart + 60)
         end
