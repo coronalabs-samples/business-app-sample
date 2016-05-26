@@ -105,7 +105,7 @@ function scene:create( event )
         title = "Photo Gallery",
         backgroundColor = { 0.96, 0.62, 0.34 },
         titleColor = {1, 1, 1},
-        font = "HelveticaNeue",
+        font = myApp.fontBold,
         leftButton = leftButton,
         rightButton = rightButton
     })

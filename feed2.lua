@@ -471,7 +471,7 @@ function scene:create( event )
         title = "Corona Video",
         backgroundColor = { 0.96, 0.62, 0.34 },
         titleColor = {1, 1, 1},
-        font = "HelveticaNeue"
+        font = myApp.fontBold
     })
     sceneGroup:insert(navBar)
 

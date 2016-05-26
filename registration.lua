@@ -90,6 +90,18 @@ local function submitForm( event )
 	composer.hideOverlay()
 end
 
+local function leftButtonEvent( event )
+    if event.phase == "ended" then
+        local currScene = composer.getSceneName( "overlay" )
+        if currScene then
+            composer.hideOverlay( "fromRight", 250 )
+        else
+            composer.gotoScene( "registration", { isModal=true, time=250, effect="fromLeft" } )
+        end
+    end
+    return true
+end
+
 function scene:create( event )
 	local sceneGroup = self.view
 
@@ -100,11 +112,19 @@ function scene:create( event )
 
     sceneGroup:insert(background)
 
+    local leftButton = {
+        width = 35,
+        height = 35,
+        label = "<Back",
+        onEvent = leftButtonEvent,
+    }
+
     navBar = widget.newNavigationBar({
         title = "Add new account",
         backgroundColor = { 0.96, 0.62, 0.34 },
         titleColor = {1, 1, 1},
-        font = myApp.fontBold
+        font = myApp.fontBold, 
+        leftButton = leftButton
     })
     sceneGroup:insert(navBar)
 

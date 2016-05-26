@@ -89,7 +89,7 @@ function scene:create( event )
         title = title,
         backgroundColor = { 0.96, 0.62, 0.34 },
         titleColor = {1, 1, 1},
-        font = "HelveticaNeue",
+        font = myApp.fontBold,
         leftButton = leftButton,
     })
     sceneGroup:insert(navBar)
@@ -203,7 +203,7 @@ function scene:show( event )
         
         webView = native.newWebView(0, 71, display.contentWidth, display.contentHeight - 150)
         webView.x = display.contentCenterX
-        webView.y = 50
+        webView.y = navBar.y + 50 + display.topStatusBarContentHeight
         webView.anchorY  = 0
         webView:request("story.html", system.TemporaryDirectory)
         webView:addEventListener( "urlRequest", webListener )

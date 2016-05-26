@@ -85,7 +85,7 @@ function scene:create( event )
         title = "Photo Gallery",
         backgroundColor = { 0.96, 0.62, 0.34 },
         titleColor = {1, 1, 1},
-        font = "HelveticaNeue"
+        font = myApp.fontBold
     })
     sceneGroup:insert(navBar)
 
@@ -117,7 +117,7 @@ function scene:create( event )
    		photosThumbnails[i].y = groupOffset --row * 80 + 40 + 70
    		photosThumbGroups[i]:insert(photosThumbnails[i])
 		photosThumbGroups[i].x = col * 80 + 40
-		photosThumbGroups[i].y = row * 80 + 40 + 70
+		photosThumbGroups[i].y = row * 80 + 40 + 75
 		photosThumbGroups[i]:setMask(thumbnailMask)
 		photosThumbGroups[i].maskX = groupOffset
 		photosThumbGroups[i].maskY = groupOffset 

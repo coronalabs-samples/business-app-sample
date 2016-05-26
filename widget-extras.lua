@@ -421,7 +421,7 @@ function widget.newTextField(options)
             end
         end
     end
-    Runtime:addEventListener( "enterFrame", syncFields )
+    --Runtime:addEventListener( "enterFrame", syncFields )
 
     function field.finalize( event )
         Runtime:removeEventListener( "enterFrame", syncFields )

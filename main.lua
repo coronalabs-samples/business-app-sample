@@ -51,24 +51,6 @@ if display.contentWidth > 320 then
     myApp.is_iPad = true
 end
 
---
--- turn on debugging
---
-local debugMode = true
-
---
--- this little snippet will make a copy of the print function
--- and now will only print if debugMode is true
--- quick way to clean up your logging for production
---
-
-reallyPrint = print
-function print(...)
-    if debugMode then
-        reallyPrint(unpack(arg))
-    end
-end
-
 math.randomseed(os.time())
 
 --
@@ -114,25 +96,22 @@ local iconInfo = {
 }
 
 myApp.icons = graphics.newImageSheet("images/ios7icons.png", iconInfo)
+myApp.font = "fonts/Roboto-Light.ttf"
+myApp.fontBold = "fonts/Roboto-Regular.ttf"
+myApp.fontItalic = "fonts/Roboto-LightItalic.ttf"
+myApp.fontBoldItalic = "fonts/Roboto-Italic.ttf"
+
+myApp.theme = "widget_theme_ios7"
 
 if system.getInfo("platformName") == "Android" then
-    myApp.theme = "widget_theme_android"
-    myApp.font = "Droid Sans"
-    myApp.fontBold = "Droid Sans Bold"
-    myApp.fontItalic = "Droid Sans"
-    myApp.fontBoldItalic = "Droid Sans Bold"
     myApp.topBarBg = "images/topBarBg7.png"
 
 else
-    myApp.theme = "widget_theme_ios7"
     local coronaBuild = system.getInfo("build")
     if tonumber(coronaBuild:sub(6,12)) < 1206 then
         myApp.theme = "widget_theme_ios"
     end
-    myApp.font = "HelveticaNeue-Light"
-    myApp.fontBold = "HelveticaNeue"
-    myApp.fontItalic = "HelveticaNeue-LightItalic"
-    myApp.fontBoldItalic = "Helvetica-BoldItalic"
+
 end
 widget.setTheme(myApp.theme)
 --
