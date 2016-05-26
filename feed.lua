@@ -123,7 +123,6 @@ local function onRowRender(event)
     row.bg.anchorX = 0
     row.bg.anchorY = 0
     row.bg:setFillColor( 1, 1, 1 )
-
     row:insert(row.bg)
     
     --
