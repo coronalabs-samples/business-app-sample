@@ -424,8 +424,10 @@ local function tableViewListener(event)
         springStart = currentPosition
         print("springStart", springStart)
         needToReload = false
-        spinner.isVisible = true
-        spinner:start()
+        if not spinner.isVisible then
+            spinner.isVisible = true
+            spinner:start()
+        end
     elseif event.phase == "moved" then
         local currentPosition = nil
         if event.target.parent.parent.getContentPosition then
