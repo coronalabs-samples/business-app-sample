@@ -10,11 +10,11 @@
 -- a list of stories.
 --
 
-module(..., package.seeall)
+--module(..., package.seeall)  -- BGB: Removed to potential memory leak
 
 local xml = require( "xml" ).newParser()
-
-function feed(filename, base)
+local M = {}                    -- BGB: added to update to current Module standards
+function M.feed(filename, base)
     rssFile = "index.rss"
     if filename then
         rssFile = filename
@@ -126,3 +126,4 @@ function feed(filename, base)
     feed.items = stories
     return feed
 end
+return M  -- BGB: Added to update to current Module standards

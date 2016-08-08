@@ -95,6 +95,11 @@ settings =
 			-- required
 			publisherId = "com.coronalabs",
 		},
+        ["plugin.utf8"] =
+        {
+            publisherId = "com.coronalabs"
+        },
+		
 	},  
 	--]]
 }

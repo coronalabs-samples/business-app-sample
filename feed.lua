@@ -40,6 +40,7 @@ local scene = composer.newScene()
 
 local socket = require( "socket" )
 local widget = require( "widget" )
+local utf8 = require( "plugin.utf8" )
 
 -- if you have an Atom feed uncomment this and comment out the line after it.
 -- local rss = require("atom")
@@ -216,15 +217,13 @@ local function onRowRender(event)
     -- Figure out how long I can make my titles
     --
     local titleLength = math.floor(display.contentWidth / 11) - 3
-    print("titleLength ", titleLength)
-    print("CL", display.contentWidth)
     --
     -- Now create the first line of text in the table view with the headline
     -- of the story item.
     --
     local myTitle = story.title
-    if string.len(myTitle) > titleLength then
-        myTitle = string.sub(story.title, 1, titleLength) .. "..."
+    if utf8.len(myTitle) > titleLength then
+        myTitle = utf8.sub(myTitle, 1, titleLength) .. "..."
     end
     row.title = display.newText( myTitle, 12, 0, myApp.fontBold, 18 )
     row.title.anchorX = 0

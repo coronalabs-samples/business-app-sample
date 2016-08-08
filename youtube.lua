@@ -9,13 +9,13 @@
 -- takes an Atom based rss feed and returns you a table of stories.
 --
 
-module(..., package.seeall)
-
+--module(..., package.seeall)
+local M={}
 local utility = require("utility")
 
 local xml = require( "xml" ).newParser()
 
-function feed(filename, base)
+function M.feed(filename, base)
     rssFile = "index.rss"
     if filename then
         rssFile = filename
@@ -142,3 +142,4 @@ function feed(filename, base)
     feed.items = stories
     return feed
 end
+return M
