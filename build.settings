@@ -7,7 +7,6 @@ settings =
 			UIApplicationExitsOnSuspend = false,
 			UIPrerenderedIcon = true,
 			UIStatusBarHidden = false,
-			CFBundleIconFile = "Icon.png",
 			CFBundleIconFiles = {
 				"Icon.png", 
 				"Icon@2x.png", 
