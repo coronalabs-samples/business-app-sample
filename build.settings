@@ -7,21 +7,18 @@ settings =
 			UIApplicationExitsOnSuspend = false,
 			UIPrerenderedIcon = true,
 			UIStatusBarHidden = false,
-			CFBundleIconFiles = {
-				"Icon.png", 
-				"Icon@2x.png", 
-				"Icon-60.png",
-				"Icon-60@2x.png",
-				"Icon-72.png", 
-				"Icon-72@2x.png",
+			UILaunchStoryboardName = "LaunchScreen",
+			CFBundleIconFiles =
+			{
+				"Icon-40.png",
+				"Icon-58.png",
 				"Icon-76.png",
-				"Icon-76@2x.png", 
-				"Icon-Small.png", 
-				"Icon-Small@2x.png",
-				"Icon-Small-40.png",
-				"Icon-Small-40@2x.png",
-				"Icon-Small-50.png", 
-				"Icon-Small-50@2x.png", 
+				"Icon-80.png",
+				"Icon-87.png",
+				"Icon-120.png",
+				"Icon-152.png",
+				"Icon-167.png",
+				"Icon-180.png",
 			},
 			NSAppTransportSecurity =
 			{
@@ -93,4 +90,11 @@ settings =
         },
 		
 	},  
+	window =
+	{
+		titleText =
+		{
+			default = "Corona Business App Sample",
+		},
+	},
 }

@@ -153,10 +153,10 @@ function scene:show( event )
                 fh:write("<h1>" .. story.title .. "</h1>\n")
             end
             if story.link then 
-                local videoID = story.link:sub(32, 42)
+                local videoID = story.link:sub(33, 43)
                 --print(videoID)
                 local height = math.floor(display.contentWidth / 16 * 9)
-                fh:write([[<iframe width="100%" height="]] .. height .. [[" src="http://www.youtube.com/embed/]] .. videoID .. [[?html5=1" frameborder="0" allowfullscreen></iframe>]])
+                fh:write([[<iframe width="100%" height="]] .. height .. [[" src="https://www.youtube.com/embed/]] .. videoID .. [[?html5=1" frameborder="0" allowfullscreen></iframe>]])
             end
             if story.content_encoded then
                 fh:write( story.content_encoded)
@@ -201,7 +201,7 @@ function scene:show( event )
         --local options = { hasBackground=true,  urlRequest=listener }
     --    native.showWebPopup(0, 51 + 60 + 20 + 60, display.contentWidth, 220 + isTall, "story.html", options )
         
-        webView = native.newWebView(0, 71, display.contentWidth, display.contentHeight - 150)
+        webView = native.newWebView(0, 71, display.contentWidth, display.actualContentHeight - 170)
         webView.x = display.contentCenterX
         webView.y = navBar.y + 50 + display.topStatusBarContentHeight
         webView.anchorY  = 0
@@ -210,7 +210,7 @@ function scene:show( event )
         -- add a button to see the full article in the web browser
         local play_button = display.newImageRect("images/view_button.png", 300, 32)
         play_button.x = display.contentCenterX
-        play_button.y = display.contentHeight - 80
+        play_button.y = display.actualContentHeight - 80
         sceneGroup:insert(play_button)
         play_button:addEventListener("tap", viewWebPage)
     end                  

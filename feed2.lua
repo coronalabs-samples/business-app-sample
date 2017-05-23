@@ -41,6 +41,7 @@ local scene = composer.newScene()
 local socket = require( "socket" )
 local widget = require( "widget" )
 local utf8 = require( "plugin.utf8" )
+local json = require("json")
 
 -- if you have an Atom feed uncomment this and comment out the line after it.
 -- local rss = require("atom")
@@ -279,7 +280,8 @@ local function showTableView()
 
     for i = 1, #stories do
 
-        print("insert row:  " .. i .. " [" .. stories[i].title .. "]")
+        --print("insert row:  " .. i .. " [" .. stories[i].title .. "]")
+        --print(json.prettify(stories[i]))
         
         myList:insertRow{
             rowHeight = 60,

@@ -302,32 +302,39 @@ myApp.tabBar = widget.newTabBar{
 }
 
 
-local background = display.newRect(0,0, display.contentWidth, display.contentHeight)
+local background = display.newRect( 0, 0, display.contentWidth, display.contentHeight )
 background:setFillColor( 1, 1, 1 )
 background.x = display.contentCenterX
 background.y = display.contentCenterY
 
-local logo = display.newImageRect("Splash.png", 320, 480)
+local title = display.newText( "Corona Labs", 0, 0, myApp.fontBold, 32 )
+title:setFillColor( 0, 0, 0 )
+title.x = display.contentCenterX
+title.y = 64
+
+local logo = display.newImageRect( "CoronaLogo.png", 256, 256 )
 logo.x = display.contentCenterX
 logo.y = display.contentCenterY
 
-local title = display.newText("Business Sample App", 0, 0, myApp.fontBold, 28)
-title:setFillColor( 0, 0, 0 )
-title.x = display.contentCenterX
-title.y = display.contentHeight - 64
+local subTitle = display.newText( "Business App Sample", 0, 0, myApp.fontBold, 28 )
+subTitle:setFillColor( 0, 0, 0 )
+subTitle.x = display.contentCenterX
+subTitle.y = display.contentHeight - 64
 --
 -- now make the first tab active.align
 --
 
 local function closeSplash()
-    display.remove(title)
+    display.remove( title )
     title = nil
-    display.remove(logo)
+    display.remove( subTitle )
+    subTitle = nil
+    display.remove( logo )
     logo = nil
-    display.remove(background)
+    display.remove( background )
     background = nil
     myApp.showScreen1()
 end
 
-timer.performWithDelay(1500, closeSplash)
+timer.performWithDelay( 1500, closeSplash )
 
