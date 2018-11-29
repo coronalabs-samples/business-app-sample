@@ -482,13 +482,13 @@ function scene:create( event )
     -- Create an invisible button to reload our table over top of the status bar
     --
 
-    local reloadBar = display.newRect(display.contentCenterX, display.topStatusBarContentHeight * 0.5, display.contentWidth, display.topStatusBarContentHeight)
+    local reloadBar = display.newRect(display.contentCenterX, display.topStatusBarContentHeight * 0.5, display.safeActualContentWidth, display.topStatusBarContentHeight)
     reloadBar.isVisible = false
     reloadBar.isHitTestable = true
     reloadBar:addEventListener( "tap", reloadTable )
 
 
-    local box = display.newRect(display.contentCenterX, display.contentCenterY, display.contentWidth, display.contentHeight - navBar.height - 50)
+    local box = display.newRect(display.contentCenterX, display.contentCenterY, display.actualContentWidth, display.actualContentHeight - navBar.height - 50)
     box:setFillColor( 0.8, 0.8, 0.8 )
     box.anchorY = 0
     box.y = navBar.height
@@ -510,8 +510,8 @@ function scene:create( event )
     --
 
     -- build a new tableView
-    local tWidth = display.contentWidth
-    local tHeight = display.contentHeight - navBar.height - myApp.tabBar.height
+    local tWidth = display.safeActualContentWidth
+    local tHeight = display.safeActualContentHeight - navBar.height - myApp.tabBar.height
 
     myList = widget.newTableView{ 
         top = navBar.height, 

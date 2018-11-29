@@ -148,7 +148,7 @@ function myApp.showScreen2(event)
     myApp.tabBar:setSelected(2)
     local options = {
         feedName = "corona.rss",
-        feedURL = "https://www.coronalabs.com/feed/",
+        feedURL = "https://www.coronalabs.com/feed",
         icons = "fixed",
         displayMode = "webpage",
         pageTitle = "Corona Labs"
@@ -287,9 +287,9 @@ local tabButtons = {
 }
 
 myApp.tabBar = widget.newTabBar{
-    top =  display.contentHeight - 50,
+    top =  display.safeActualContentHeight - 50 + display.safeScreenOriginY,
     left = 0,
-    width = display.contentWidth,
+    width = display.safeActualContentWidth,
     backgroundFile = tabBarBackgroundFile,
     tabSelectedLeftFile = tabBarLeft,      -- New
     tabSelectedRightFile = tabBarRight,    -- New
@@ -302,7 +302,7 @@ myApp.tabBar = widget.newTabBar{
 }
 
 
-local background = display.newRect( 0, 0, display.contentWidth, display.contentHeight )
+local background = display.newRect( 0, 0, display.actualContentWidth, display.actualContentHeight )
 background:setFillColor( 1, 1, 1 )
 background.x = display.contentCenterX
 background.y = display.contentCenterY

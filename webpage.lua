@@ -65,7 +65,7 @@ function scene:create( event )
     --
 
     print("create scene")
-    local background = display.newRect(0,0,display.contentWidth, display.contentHeight)
+    local background = display.newRect(0,0,display.actualContentWidth, display.actualContentHeight)
     background:setFillColor( 0.95, 0.95, 0.95 )
     background.x = display.contentCenterX
     background.y = display.contentCenterY
@@ -160,9 +160,10 @@ function scene:show( event )
             
             local url = event.url
 
-            if( string.find( url, "http:" ) ~= nil or string.find( url, "mailto:" ) ~= nil ) then
+            if( string.find( url, "https:" ) ~= nil or string.find( url, "mailto:" ) ~= nil ) then
                 print("url: ".. url)
                 system.openURL(url)
+                webView:back()
             end
 
             return true
@@ -179,7 +180,7 @@ function scene:show( event )
         --local options = { hasBackground=true,  urlRequest=listener }
     --    native.showWebPopup(0, 51 + 60 + 20 + 60, display.contentWidth, 220 + isTall, "story.html", options )
 
-        webView = native.newWebView(0, 71, display.contentWidth, display.contentHeight - 150)
+        webView = native.newWebView(0, 71, display.actualContentWidth, display.actualContentHeight - 200 - display.safeScreenOriginY)
         webView.x = display.contentCenterX
         webView.y = navBar.y + 50 + display.topStatusBarContentHeight
         webView.anchorY  = 0
@@ -190,7 +191,7 @@ function scene:show( event )
         -- add a button to see the full article in the web browser
         local play_button = display.newImageRect("images/view_button.png", 300, 32)
         play_button.x = display.contentCenterX
-        play_button.y = display.contentHeight - 80
+        play_button.y = display.safeActualContentHeight - 80 + display.safeScreenOriginY
         sceneGroup:insert(play_button)
         play_button:addEventListener("tap", viewWebPage)
     end              

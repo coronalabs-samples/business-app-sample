@@ -172,16 +172,16 @@ function scene:create( event )
     addressLabel.anchorY = 0.5
 
     addressGroup.x = 0
-    addressGroup.y = navBar.y + 65
+    addressGroup.y = navBar.y + 45 + display.safeScreenOriginY
     --
     -- This serves two purposes.  First, its place holder so we can see where the mapView will be while
     -- working in the simulator.  Secondly, it lets us have something to calculate the positions of the
     -- map's tabs before the map is created.
     --
 
-    mapWidth = display.contentWidth
+    mapWidth = display.safeActualContentWidth
     -- height of tabBar - height of the navBar - 20px for the buttons.
-    mapHeight = display.contentHeight - 50 - navBar.height - 30 - 30 --(address field height defined later)
+    mapHeight = display.safeActualContentHeight - 50 - navBar.height - 30  --(address field height defined later)
 
 	local mapbox = display.newRect(0, 0, mapWidth, mapHeight)
 	mapbox.x = display.contentCenterX

@@ -74,7 +74,7 @@ end
 function scene:create( event )
     local sceneGroup = self.view
 
-    local background = display.newRect(0,0,display.contentWidth, display.contentHeight)
+    local background = display.newRect(0,0,display.actualContentWidth, display.actualContentHeight)
     background:setFillColor( 0.95, 0.95, 0.95 )
     background.x = display.contentWidth / 2
     background.y = display.contentHeight / 2
@@ -94,12 +94,11 @@ function scene:create( event )
 
     local thumbnailMask = graphics.newMask("images/mask-80x80.png")
 
-    local groupOffset = 0
-    if tonumber( system.getInfo("build") ) < 2013.2000 then
-        groupOffset = 40
-    end
+    local groupOffsetX = 0
 
-    local maxCol = math.floor( display.contentWidth / 80 ) - 1
+    local groupOffsetY = 10
+
+    local maxCol = math.floor( display.actualContentWidth / 80 ) - 1
 
     for i = 1, #photoFiles do
     	photosThumbnails[i] = display.newImage(photoFiles[i])
@@ -113,14 +112,14 @@ function scene:create( event )
     	--print(scale, aspectRatio, photosThumbnails[i].width, photosThumbnails[i].width * scale, photosThumbnails[i].height, photosThumbnails[i].height * scale)
    		photosThumbnails[i]:scale(scale,scale)
    		photosThumbGroups[i] = display.newGroup()
-   		photosThumbnails[i].x = groupOffset --col * 80 + 40
-   		photosThumbnails[i].y = groupOffset --row * 80 + 40 + 70
+   		photosThumbnails[i].x = 0 --groupOffsetX --col * 80 + 40
+   		photosThumbnails[i].y = 0 --row * 80 + 40 + 70
    		photosThumbGroups[i]:insert(photosThumbnails[i])
-		photosThumbGroups[i].x = col * 80 + 40
-		photosThumbGroups[i].y = row * 80 + 40 + 75
+		photosThumbGroups[i].x = col * 80 + 40 + display.safeScreenOriginX
+		photosThumbGroups[i].y = row * 80 + 40 + 50 + display.safeScreenOriginY
 		photosThumbGroups[i]:setMask(thumbnailMask)
-		photosThumbGroups[i].maskX = groupOffset
-		photosThumbGroups[i].maskY = groupOffset 
+		photosThumbGroups[i].maskX = 0 --groupOffset
+		photosThumbGroups[i].maskY = 0 --groupOffset 
 		photosThumbGroups[i].index = i
 		photosThumbGroups[i]:addEventListener("touch", showPhoto)
 		col = col + 1

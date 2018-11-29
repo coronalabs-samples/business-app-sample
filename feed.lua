@@ -454,10 +454,10 @@ function scene:create( event )
     --
 
     print("create scene")
-    local background = display.newRect(0,0,display.contentWidth, display.contentHeight)
+    local background = display.newRect(0,0,display.actualContentWidth, display.actualContentHeight)
     background:setFillColor( 0.95, 0.95, 0.95 )
-    background.x = display.contentWidth / 2
-    background.y = display.contentHeight / 2
+    background.x = display.contentCenterX
+    background.y = display.contentCenterY
 
     sceneGroup:insert(background)
 
@@ -473,13 +473,13 @@ function scene:create( event )
     -- Create an invisible button to reload our table over top of the status bar
     --
 
-    local reloadBar = display.newRect(display.contentCenterX, display.topStatusBarContentHeight * 0.5, display.contentWidth, display.topStatusBarContentHeight)
+    local reloadBar = display.newRect(display.contentCenterX, display.topStatusBarContentHeight * 0.5, display.safeActualContentWidth, display.topStatusBarContentHeight)
     reloadBar.isVisible = false
     reloadBar.isHitTestable = true
     reloadBar:addEventListener( "tap", reloadTable )
 
 
-    local box = display.newRect(display.contentCenterX, display.contentCenterY, display.contentWidth, display.contentHeight - navBar.height - 50)
+    local box = display.newRect(display.contentCenterX, display.contentCenterY, display.actualContentWidth, display.actualContentHeight - navBar.height - 50)
     box:setFillColor( 0.8, 0.8, 0.8 )
     box.anchorY = 0
     box.y = navBar.height
@@ -500,14 +500,14 @@ function scene:create( event )
     -- Since we are not using the whole screen we will need a mask file.
     --
 
-    local tWidth = display.contentWidth
-    local tHeight = display.contentHeight - navBar.height - myApp.tabBar.height
+    local tWidth = display.safeActualContentWidth
+    local tHeight = display.safeActualContentHeight - navBar.height - myApp.tabBar.height 
 
     myList = widget.newTableView{ 
         top = navBar.height, 
         width = tWidth, 
         height = tHeight, 
-        maskFile = maskFile,
+        --maskFile = maskFile,
         listener = tableViewListener,
         hideBackground = true, 
         onRowRender = onRowRender,
