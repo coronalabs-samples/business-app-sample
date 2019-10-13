@@ -11,7 +11,7 @@
 
 --module(..., package.seeall)
 local M ={}
-local xml = require( "xml" ).newParser()
+local xml = require( "classes.xml" ).newParser()
 
 function M.feed(filename, base)
     rssFile = "index.rss"

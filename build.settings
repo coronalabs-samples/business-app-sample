@@ -1,38 +1,5 @@
 settings =
 {
-	iphone =
-	{
-		xcassets = "Images.xcassets",
-		plist=
-		{
-			UIApplicationExitsOnSuspend = false,
-			UIPrerenderedIcon = true,
-			UIStatusBarHidden = false,
-			UILaunchStoryboardName = "LaunchScreen",
-			NSAppTransportSecurity =
-			{
-				NSExceptionDomains =
-				{
-					["coronalabs.com"] =
-					{
-						NSIncludesSubdomains = true,
-						NSThirdPartyExceptionAllowsInsecureHTTPLoads = true
-					},
-					["youtube.com"] =
-					{
-						NSIncludesSubdomains = true,
-						NSThirdPartyExceptionAllowsInsecureHTTPLoads = true
-					},
-					["google.com"] =
-					{
-						NSIncludesSubdomains = true,
-						NSThirdPartyExceptionAllowsInsecureHTTPLoads = true
-					},
-				},
-			},
-
-		},
-	},
 	orientation =
 	{
 		default = "portrait",
@@ -66,12 +33,52 @@ settings =
 			{ name = "android.hardware.location.network", required = false },
 		},
 	},
+	iphone =
+	{
+		xcassets = "Images.xcassets",
+		plist=
+		{
+			UIPrerenderedIcon = true,
+			UIStatusBarHidden = false,
+			UILaunchStoryboardName = "LaunchScreen",
+			ITSAppUsesNonExemptEncryption = false, -- This sample doesn't use custom encryption
+			NSAppTransportSecurity =
+			{
+				NSExceptionDomains =
+				{
+					["coronalabs.com"] =
+					{
+						NSIncludesSubdomains = true,
+						NSThirdPartyExceptionAllowsInsecureHTTPLoads = true
+					},
+					["youtube.com"] =
+					{
+						NSIncludesSubdomains = true,
+						NSThirdPartyExceptionAllowsInsecureHTTPLoads = true
+					},
+					["google.com"] =
+					{
+						NSIncludesSubdomains = true,
+						NSThirdPartyExceptionAllowsInsecureHTTPLoads = true
+					},
+				},
+			},
+
+		},
+	},
 	plugins =
 	{
+		["CoronaProvider.native.popup.activity"] =
+		{
+			-- required
+			publisherId = "com.coronalabs",
+			supportedPlatforms = { iphone = true },
+		},
 		["CoronaProvider.native.popup.social"] =
 		{
 			-- required
 			publisherId = "com.coronalabs",
+			supportedPlatforms = { android = true },
 		},
         ["plugin.utf8"] =
         {

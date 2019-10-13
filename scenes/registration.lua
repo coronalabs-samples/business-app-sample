@@ -38,9 +38,9 @@ local composer = require( "composer" )
 local scene = composer.newScene()
 local widget = require( "widget" )
 local json = require( "json" )
-local widgetExtras = require( "widget-extras" )
-local myApp = require( "myapp" )
-local db = require( "database" )
+local widgetExtras = require( "classes.widget-extras" )
+local myApp = require( "classes.myapp" )
+local db = require( "classes.database" )
 
 widget.setTheme(myApp.theme)
 
@@ -96,7 +96,7 @@ local function leftButtonEvent( event )
         if currScene then
             composer.hideOverlay( "fromRight", 250 )
         else
-            composer.gotoScene( "registration", { isModal=true, time=250, effect="fromLeft" } )
+            composer.gotoScene( "scenes.registration", { isModal=true, time=250, effect="fromLeft" } )
         end
     end
     return true

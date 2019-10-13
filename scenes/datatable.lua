@@ -38,9 +38,9 @@ local composer = require( "composer" )
 local scene = composer.newScene()
 local widget = require( "widget" )
 local json = require( "json" )
-local widgetExtras = require( "widget-extras" )
-local myApp = require( "myapp" )
-local db = require( "database" )
+local widgetExtras = require( "classes.widget-extras" )
+local myApp = require( "classes.myapp" )
+local db = require( "classes.database" )
 
 widget.setTheme(myApp.theme)
 
@@ -66,7 +66,7 @@ local onRowTouch = function( event )
             isModal = true,
             params = params
         }
-        composer.showOverlay("edituser", options)
+        composer.showOverlay("scenes.edituser", options)
     end
     return true
 end
@@ -185,7 +185,7 @@ end
 
 local function addButtonListener( event )
 	if event.phase == "began" then
-		composer.showOverlay("registration", { time = 250, effect = "slideLeft" })
+		composer.showOverlay("scenes.registration", { time = 250, effect = "slideLeft" })
 	end
 	return true
 end

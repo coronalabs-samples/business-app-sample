@@ -27,8 +27,15 @@ local scene = composer.newScene()
 
 local widget = require("widget")
 
-local myApp = require( "myapp" )
+local myApp = require( "classes.myapp" )
 widget.setTheme(myApp.theme)
+
+local activity = nil
+
+
+if system.getInfo("platform") == "ios" then
+	activity = require( "CoronaProvider.native.popup.activity" )
+end
 
 local screenW, screenH = display.contentWidth, display.contentHeight
 local viewableScreenW, viewableScreenH = display.viewableContentWidth, display.viewableContentHeight
@@ -40,6 +47,7 @@ local touchListener, nextImage, prevImage, cancelMove, initImage, jumpToImage
 local background
 local imageNumberText, imageNumberTextShadow
 local backbutton
+local imageSet
 
 
 local function goBack( event )
@@ -62,7 +70,7 @@ function scene:create( event )
 	if event.params and event.params.start then
 		start = event.params.start
 	end
-	local imageSet = event.params.images
+	imageSet = event.params.images
 	assert(imageSet, "Error: image list not set")
 
 	viewableScreenW = display.contentWidth
@@ -80,7 +88,57 @@ function scene:create( event )
 
     local function showPanel( event )
     	if event.phase == "ended" then
-    		sharingPanel:show()
+    		if system.getInfo("platform") == "ios" and activity then
+				local popupListener = {}
+				function popupListener:popup( event )
+				    print(
+				        "(name, type, activity, action):", 
+				        event.name, event.type, tostring(event.activity), tostring(event.action)
+				    )
+				end
+				 
+				local itemsToShare = {
+				    {
+				        type = "image",
+				        value = { filename = imageSet[imgNum], baseDir = system.ResourceDirectory }
+				    },
+				    { 
+				    	type = "url", 
+				    	value = "https://github.com/coronalabs-samples/business-app-sample" 
+				    },
+				    { 
+				    	type = "string", 
+				    	value = "Welcome to the Corona Business App sample!" 
+				    },
+				}
+				 
+				local options = { items=itemsToShare, listener=popupListener }
+				 
+				native.showPopup( "activity", options )
+    		elseif system.getInfo("platform") == "android" then
+    			local popupListener = {}
+     
+			    function popupListener:popup( event )
+			        print( "name: " .. event.name )
+			        print( "type: " .. event.type )
+			        print( "action: " .. tostring( event.action ) )
+			        print( "limitReached: " .. tostring( event.limitReached ) )
+			    end
+			 
+			    native.showPopup( "social",
+			    {
+			        message = "Welcome to the Corona Business App sample!",
+			        listener = popupListener,
+			        image = 
+			        {
+			            { filename = imageSet[imgNum], baseDir = system.ResourceDirectory },
+			        },
+			        url = 
+			        {
+			            "https://github.com/coronalabs-samples/business-app-sample",
+			        }
+			    })
+    		end
     	end
     	return true
     end

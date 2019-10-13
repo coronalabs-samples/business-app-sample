@@ -1,10 +1,10 @@
--- Project: Business Sample app
+-- Project: Business Sample App
 --
--- File name: podcast.lua
+-- File name: webpage.lua
 --
 -- Author: Corona Labs
 --
--- Abstract: Play a video.
+-- Abstract: Display a web page.
 --
 --
 -- Target devices: simulator, device
@@ -37,35 +37,35 @@ DEALINGS IN THE SOFTWARE.
 local composer = require( "composer" )
 local scene = composer.newScene()
 
-local widget = require( "widget" )
-local myApp = require( "myapp" )
-
-local utility = require( "utility" )
+local widget = require("widget")
+local myApp = require("classes.myapp")
 
 widget.setTheme(myApp.theme)
 
-local backButton 
 local playButton
-local titleText
 local webView
+local backButton
+local navBar
 
 local function goBack(event)
-    composer.hideOverlay( "slideRight", 250)
+    if event.phase == "ended" then
+        composer.hideOverlay( "slideRight", 250)
+    end
     return true
 end
 
 function scene:create( event )
     local sceneGroup = self.view
-        
-    local params = event.params
-    local story = event.params.story
 
+    local story = event.params.story
+        
     --
-    -- setup a page background, really not that important 
+    -- setup a page background, really not that important, but if we don't
+    -- have at least one display object in the view, it will crash.
     --
 
     print("create scene")
-    local background = display.newRect(0,0,display.contentWidth, display.contentHeight)
+    local background = display.newRect(0,0,display.actualContentWidth, display.actualContentHeight)
     background:setFillColor( 0.95, 0.95, 0.95 )
     background.x = display.contentCenterX
     background.y = display.contentCenterY
@@ -98,34 +98,23 @@ end
 
 function scene:show( event )
     local sceneGroup = self.view
-    local phase = event.phase
-    local params = event.params
+
+    -- load the story data in from global space, was put there in feed.lua
+    local story = event.params.story
 
     if event.phase == "did" then
-        local story = params.story
-        local enclosures = story.enclosuers
 
         local title = story.title
-        if title and title:len() > 16 then
-            title = title:sub(1,16) .. "..."
+        if title then
+            if title:len() > 16 then
+                title = title:sub(1,16) .. "..."
+            end
+        else
+            title = "Corona Labs"
         end
-
         navBar:setLabel( title )
-        
-        --utility.print_r( story )
 
-        -- do nothing when the podcast finishes playing.
-        local function onComplete(event)
-            return true
-        end
-        
-        -- function to play the podcast.  We get the URL to stream from the story.enclosures
-        -- table.
-        local function playPodcast()
-            print("playPodcast", story.link)
-            media.playVideo( story.link, media.RemoteSource, true, onComplete )
-            return true
-        end
+        -- if the reader choses to see the article in the web browser, open it.
         
         local function viewWebPage(event)
             system.openURL( story.link )
@@ -147,23 +136,16 @@ function scene:show( event )
             print( "Created file" )
             fh:write("<!doctype html>\n<html>\n<head>\n<meta charset=\"utf-8\">")
             fh:write("<meta name=\"viewport\" content=\"width=320; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;\"/>\n")
-            fh:write("<style type=\"text/css\">\n html { -webkit-text-size-adjust: none; font-family: HelveticaNeue-Light, Helvetica, Droid-Sans, Arial, san-serif; font-size: 1.0em; } h1 {font-size:1.25em;} p {font-size:0.9em; } </style>")
+            fh:write("<style type=\"text/css\">\n html { -webkit-text-size-adjust: none; font-family: HelveticaNeue-Light, Helvetica, Droid-Sans, Arial, san-serif; font-size: 1.1em; } h1 {font-size:1.25em;} p {font-size:0.9em; } </style>")
             fh:write("</head>\n<body>\n")
             if story.title then
                 fh:write("<h1>" .. story.title .. "</h1>\n")
-            end
-            if story.link then 
-                local videoID = story.youTubeId --story.link:sub(33, 43)
-                --print(videoID)
-                local height = math.floor(display.contentWidth / 16 * 9)
-                fh:write([[<iframe width="100%" height="]] .. height .. [[" src="https://www.youtube.com/embed/]] .. videoID .. [[?html5=1" frameborder="0" allowfullscreen></iframe>]])
             end
             if story.content_encoded then
                 fh:write( story.content_encoded)
             elseif story.description then
                 fh:write(story.description)
             end
-
             fh:write( "\n</body>\n</html>\n" )
             io.close( fh )
         else
@@ -178,13 +160,10 @@ function scene:show( event )
             
             local url = event.url
 
-            if string.find(url, "http://www.youtube.com") then
-                return true
-            end
-
-            if( string.find( url, "http:" ) ~= nil or string.find( url, "mailto:" ) ~= nil ) then
+            if( string.find( url, "https:" ) ~= nil or string.find( url, "mailto:" ) ~= nil ) then
                 print("url: ".. url)
                 system.openURL(url)
+                webView:back()
             end
 
             return true
@@ -200,25 +179,27 @@ function scene:show( event )
     --    local options = { hasBackground=false, baseUrl=system.TemporaryDirectory, urlRequest=listener }
         --local options = { hasBackground=true,  urlRequest=listener }
     --    native.showWebPopup(0, 51 + 60 + 20 + 60, display.contentWidth, 220 + isTall, "story.html", options )
-        
-        webView = native.newWebView(0, 71, display.contentWidth, display.actualContentHeight - 170)
+
+        webView = native.newWebView(0, 71, display.actualContentWidth, display.actualContentHeight - 200 - display.safeScreenOriginY)
         webView.x = display.contentCenterX
         webView.y = navBar.y + 50 + display.topStatusBarContentHeight
         webView.anchorY  = 0
+
         webView:request("story.html", system.TemporaryDirectory)
+
         webView:addEventListener( "urlRequest", webListener )
         -- add a button to see the full article in the web browser
         local play_button = display.newImageRect("images/view_button.png", 300, 32)
         play_button.x = display.contentCenterX
-        play_button.y = display.actualContentHeight - 80
+        play_button.y = display.safeActualContentHeight - 80 + display.safeScreenOriginY
         sceneGroup:insert(play_button)
         play_button:addEventListener("tap", viewWebPage)
-    end                  
+    end              
 end
 
 function scene:hide( event )
     local sceneGroup = self.view
-    
+
     --
     -- Clean up any native objects and Runtime listeners, timers, etc.
     --
@@ -227,13 +208,12 @@ function scene:hide( event )
             webView:removeSelf()
             webView = nil
         end
-    end   
+    end
 end
 
 function scene:destroy( event )
     local sceneGroup = self.view
     
-    print("destroy scene")
 end
 
 
@@ -241,18 +221,9 @@ end
 -- END OF YOUR IMPLEMENTATION
 ---------------------------------------------------------------------------------
 
--- "createScene" event is dispatched if scene's view does not exist
 scene:addEventListener( "create", scene )
-
--- "enterScene" event is dispatched whenever scene transition has finished
 scene:addEventListener( "show", scene )
-
--- "exitScene" event is dispatched before next scene's transition begins
 scene:addEventListener( "hide", scene )
-
--- "destroyScene" event is dispatched before view is unloaded, which can be
--- automatically unloaded in low memory situations, or explicitly via a call to
--- storyboard.purgeScene() or storyboard.removeScene().
 scene:addEventListener( "destroy", scene )
 
 ---------------------------------------------------------------------------------

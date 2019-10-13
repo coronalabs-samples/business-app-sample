@@ -41,7 +41,7 @@ DEALINGS IN THE SOFTWARE.
 local composer = require ( "composer" )
 local widget = require( "widget" )
 local json = require( "json" )
-local myApp = require( "myapp" ) 
+local myApp = require( "classes.myapp" ) 
 
 if (display.pixelHeight/display.pixelWidth) > 1.5 then
     myApp.isTall = true
@@ -56,7 +56,7 @@ math.randomseed(os.time())
 --
 -- Initialize database
 -- 
-local db = require( "database" )
+local db = require( "classes.database" )
 local myScheme = {}
 myScheme["__tableName"] = "accounts"
 myScheme["firstName"] = "text"
@@ -140,7 +140,7 @@ myApp.tabBar = {}
 function myApp.showScreen1()
     myApp.tabBar:setSelected(1)
     composer.removeHidden()
-    composer.gotoScene("menu", {time=250, effect="crossFade"})
+    composer.gotoScene("scenes.menu", {time=250, effect="crossFade"})
     return true
 end
 
@@ -150,18 +150,18 @@ function myApp.showScreen2(event)
         feedName = "corona.rss",
         feedURL = "https://www.coronalabs.com/feed",
         icons = "fixed",
-        displayMode = "webpage",
+        displayMode = "scenes.webpage",
         pageTitle = "Corona Labs"
     }
     composer.removeHidden()
-    composer.gotoScene("feed", {time=250, effect="crossFade", params = options})
+    composer.gotoScene("scenes.feed", {time=250, effect="crossFade", params = options})
     return true
 end
 
 function myApp.showScreen3()
     myApp.tabBar:setSelected(3)
     composer.removeHidden()
-    composer.gotoScene("photogallery", {time=250, effect="crossFade"})
+    composer.gotoScene("scenes.photogallery", {time=250, effect="crossFade"})
     return true
 end
 
@@ -171,11 +171,11 @@ function myApp.showScreen4()
         feedName = "video.rss",
         feedURL = "https://www.youtube.com/feeds/videos.xml?user=CoronaLabs",
         icons = "fixed",
-        displayMode = "videoviewer",
+        displayMode = "scenes.videoviewer",
         pageTitle = "Corona Videos"
     }
     composer.removeHidden()
-    composer.gotoScene("feed2", {time=250, effect="crossFade", params = options})
+    composer.gotoScene("scenes.feed2", {time=250, effect="crossFade", params = options})
     return true
 end
 
@@ -186,7 +186,7 @@ function myApp.showScreen5()
         pageTitle = "Corona Headquarters"
     }
     composer.removeHidden()
-    composer.gotoScene("mapscene", {time=250, effect="crossFade", params = options})
+    composer.gotoScene("scenes.mapscene", {time=250, effect="crossFade", params = options})
     return true
 end
 
@@ -197,7 +197,7 @@ function myApp.showScreen6()
         pageTitle = "Data Table"
     }
     composer.removeHidden()
-    composer.gotoScene("datatable", {time=250, effect="crossFade", params = options})
+    composer.gotoScene("scenes.datatable", {time=250, effect="crossFade", params = options})
     return true
 end
 --
@@ -312,7 +312,7 @@ title:setFillColor( 0, 0, 0 )
 title.x = display.contentCenterX
 title.y = 64
 
-local logo = display.newImageRect( "CoronaLogo.png", 256, 256 )
+local logo = display.newImageRect( "images/CoronaLogo.png", 256, 256 )
 logo.x = display.contentCenterX
 logo.y = display.contentCenterY
 

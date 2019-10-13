@@ -41,14 +41,11 @@ local scene = composer.newScene()
 local socket = require( "socket" )
 local widget = require( "widget" )
 local utf8 = require( "plugin.utf8" )
-local json = require("json")
 
 -- if you have an Atom feed uncomment this and comment out the line after it.
--- local rss = require("atom")
-local atom = require( "youtube" )
-local myApp = require( "myapp" )
-
-local utility = require( "utility" )
+-- local rss = require("classes.atom")
+local rss = require( "classes.rss" )
+local myApp = require( "classes.myapp" )
 
 widget.setTheme(myApp.theme)
 
@@ -118,7 +115,7 @@ local function onRowRender(event)
     local story = event.row.params.story
     local id = row.index
     --
-    -- boundry check to make sure we are tnot trying to access a story that
+    -- boundry check to make sure we are not trying to access a story that
     -- doesnt exist.
     --
     if id > #stories then return true end
@@ -127,7 +124,6 @@ local function onRowRender(event)
     row.bg.anchorX = 0
     row.bg.anchorY = 0
     row.bg:setFillColor( 1, 1, 1 )
-
     row:insert(row.bg)
     
     --
@@ -227,7 +223,7 @@ local function onRowRender(event)
     --
     local myTitle = story.title
     if utf8.len(myTitle) > titleLength then
-        myTitle = utf8.sub(story.title, 1, titleLength) .. "..."
+        myTitle = utf8.sub(myTitle, 1, titleLength) .. "..."
     end
     row.title = display.newText( myTitle, 12, 0, myApp.fontBold, 18 )
     row.title.anchorX = 0
@@ -241,15 +237,12 @@ local function onRowRender(event)
     --
     -- show the publish time in grey below the headline
     --
-    --
-    -- 2014-10-01T20:23:40+00:00
-    local year, month, day, hour, min = string.match(story.pubDate,"(%d+)-(%d+)-(%d+)T(%d+):(%d+):")
-    row.subtitle = display.newText( month.."/"..day.."/"..year.." "..hour..":"..min, 12, 0, myApp.font, 14)
+    local timeStamp = string.match(story.pubDate,"%w+, %d+ %w+ %w+ %w+:%w+")
+    row.subtitle = display.newText( timeStamp, 12, 0, myApp.font, 14)
     row.subtitle.anchorX = 0
     row.subtitle:setFillColor( 0.375, 0.375, 0.375 )
     row.subtitle.y = row.height - 18
     row.subtitle.x = 42
-    --]]
 
     --
     -- Add a graphical right arrow to the right side to indicate the reader
@@ -280,8 +273,7 @@ local function showTableView()
 
     for i = 1, #stories do
 
-        --print("insert row:  " .. i .. " [" .. stories[i].title .. "]")
-        --print(json.prettify(stories[i]))
+        print("insert row:  " .. i .. " [" .. stories[i].title .. "]")
         
         myList:insertRow{
             rowHeight = 60,
@@ -334,10 +326,9 @@ function displayFeed(feedName, feedURL)
         native.setActivityIndicator(false)
         print("Parsing the feed")
         local story = {}
-        local feed = atom.feed(file, path)
+        local feed = rss.feed(file, path)
         
         stories = feed.items
-        --utility.print_r(stories)
         print("Num stories: " .. #stories)
         print("Got ", #stories, " stories, now show the tableView")
         purgeList(myList)
@@ -463,15 +454,15 @@ function scene:create( event )
     --
 
     print("create scene")
-    local background = display.newRect(0,0,display.contentWidth, display.contentHeight)
+    local background = display.newRect(0,0,display.actualContentWidth, display.actualContentHeight)
     background:setFillColor( 0.95, 0.95, 0.95 )
-    background.x = display.contentWidth / 2
-    background.y = display.contentHeight / 2
+    background.x = display.contentCenterX
+    background.y = display.contentCenterY
 
     sceneGroup:insert(background)
 
     local navBar = widget.newNavigationBar({
-        title = "Corona Video",
+        title = "Corona Labs",
         backgroundColor = { 0.96, 0.62, 0.34 },
         titleColor = {1, 1, 1},
         font = myApp.fontBold
@@ -509,15 +500,14 @@ function scene:create( event )
     -- Since we are not using the whole screen we will need a mask file.
     --
 
-    -- build a new tableView
     local tWidth = display.safeActualContentWidth
-    local tHeight = display.safeActualContentHeight - navBar.height - myApp.tabBar.height
+    local tHeight = display.safeActualContentHeight - navBar.height - myApp.tabBar.height 
 
     myList = widget.newTableView{ 
         top = navBar.height, 
         width = tWidth, 
         height = tHeight, 
-        maskFile = maskFile,
+        --maskFile = maskFile,
         listener = tableViewListener,
         hideBackground = true, 
         onRowRender = onRowRender,

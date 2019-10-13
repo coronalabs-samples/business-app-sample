@@ -37,8 +37,8 @@ DEALINGS IN THE SOFTWARE.
 local composer = require( "composer" )
 local scene = composer.newScene()
 local widget = require( "widget" )
-local widgetExtras = require( "widget-extras" )
-local myApp = require( "myapp" )
+local widgetExtras = require( "classes.widget-extras" )
+local myApp = require( "classes.myapp" )
 
 widget.setTheme(myApp.theme)
 

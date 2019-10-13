@@ -1,6 +1,6 @@
 local widget = require( "widget" )
 local json = require( "json" )
-local myApp = require( "myapp" )
+local myApp = require( "classes.myapp" )
 
 function widget.newSharingPanel( services )
     local function onRowTouch( event )

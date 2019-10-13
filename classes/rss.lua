@@ -12,7 +12,7 @@
 
 --module(..., package.seeall)  -- BGB: Removed to potential memory leak
 
-local xml = require( "xml" ).newParser()
+local xml = require( "classes.xml" ).newParser()
 local M = {}                    -- BGB: added to update to current Module standards
 function M.feed(filename, base)
     rssFile = "index.rss"

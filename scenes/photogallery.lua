@@ -37,7 +37,7 @@ local composer = require( "composer" )
 local scene = composer.newScene()
 
 local widget = require("widget")
-local myApp = require("myapp")
+local myApp = require("classes.myapp")
 
 widget.setTheme(myApp.theme)
 
@@ -66,7 +66,7 @@ local photosThumbGroups = {}
 
 local function showPhoto(event)
 	if event.phase == "ended" then
-        composer.showOverlay("slideView", {time=250, effect="crossFade", params={start=event.target.index, images=photoFiles}})
+        composer.showOverlay("scenes.slideView", {time=250, effect="crossFade", params={start=event.target.index, images=photoFiles}})
 	end
 	return true
 end
@@ -88,6 +88,7 @@ function scene:create( event )
         font = myApp.fontBold
     })
     sceneGroup:insert(navBar)
+    print("navBar.y", navBar.y, "navBar.height", navBar.height)
 
     local row = 0
     local col = 0
@@ -116,7 +117,7 @@ function scene:create( event )
    		photosThumbnails[i].y = 0 --row * 80 + 40 + 70
    		photosThumbGroups[i]:insert(photosThumbnails[i])
 		photosThumbGroups[i].x = col * 80 + 40 + display.safeScreenOriginX
-		photosThumbGroups[i].y = row * 80 + 40 + 50 + display.safeScreenOriginY
+		photosThumbGroups[i].y = row * 80 + 40 + navBar.height -- + display.safeScreenOriginY
 		photosThumbGroups[i]:setMask(thumbnailMask)
 		photosThumbGroups[i].maskX = 0 --groupOffset
 		photosThumbGroups[i].maskY = 0 --groupOffset 
